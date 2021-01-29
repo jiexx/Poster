@@ -1,0 +1,36 @@
+<div fxLayout="column" fxLayoutAlign="center center" fxFill >
+    <mat-toolbar color="primary" fxLayout="row" fxLayoutAlign="center center"  class="header">
+        <div fxFlex=100 fxLayoutAlign="space-between center" >
+            <nav mat-tab-nav-bar backgroundColor="primary" fxFlex="none" >
+                <a mat-tab-link  (click)="changeMode('readonly')"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
+                    <div><div *ngIf="mode=='confirm'"><返回</div></div>
+                </a>
+            </nav>
+            <nav mat-tab-nav-bar backgroundColor="primary" fxFlex="none" >
+                <a><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
+                    <div>{{title}}</div>
+                </a>
+            </nav>
+            <nav mat-tab-nav-bar backgroundColor="primary" fxFlex="none" >
+                <a mat-tab-link  (click)="logout()"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
+                    <div><div *ngIf="mode=='readonly'">注销</div></div>
+                </a>
+            </nav>
+        </div>
+    </mat-toolbar>
+    <div fxFlex="grow" style="width:100%;padding: 1rem">
+        <router-outlet #o="outlet" ></router-outlet>  
+    </div>
+    <mat-toolbar color="primary" fxLayout="row" fxLayoutAlign="center center" class="footer" *ngIf="mode=='readonly' || mode =='editable'">
+        <div fxFlex=70 fxLayout="row" fxLayoutAlign="space-between center" >
+            <nav mat-tab-nav-bar backgroundColor="primary" fxFlex fxLayout="row" fxLayoutAlign="center center">
+                <a mat-tab-link fxFlex="50"  (click)="changeMode('readonly')"  [active]="!at"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
+                    <div>搜索</div>
+                </a>
+                <a mat-tab-link fxFlex="50"  (click)="input()"  [active]="!at"><!-- (click)="changeMode('editable')"[routerLinkActiveOptions]="{exact:true}"  > -->
+                    <div>录入</div>
+                </a>
+            </nav>
+        </div>
+    </mat-toolbar>
+</div>

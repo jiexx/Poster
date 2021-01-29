@@ -1,0 +1,32 @@
+.mat-subheading-2 {
+    margin: 0
+}
+mat-toolbar {
+    height: auto;
+}
+.banner-bg {
+    background-color: white;
+}
+.banner-top {
+    height: auto;
+    padding: 1.5rem 0 0 0;
+    margin: 0;
+}
+.banner-bottom {
+    height: auto;
+    padding: 0 0 1.5rem 0;
+    margin: 0;
+    font-weight: 200;
+}
+.header {
+    position: fixed;
+    width: 100%;
+    top: 0; 
+    z-index: 1000;
+}
+.footer {
+    position: fixed;
+    width: 100%;
+    bottom: 0; 
+    z-index: 1000;
+}

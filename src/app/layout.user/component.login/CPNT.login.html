@@ -1,0 +1,24 @@
+<div class="absolute"  fxLayout="row" fxLayoutAlign="center center" fxLayoutGap=1rem >
+    <mat-card  fxFlex=35  fxFlex.lt-md=90 [@enterAnimation]>  <!--  [style.visibility]="step == 1 ? 'visible' : 'hidden'"-->
+        <mat-toolbar >登陆</mat-toolbar>
+        <br><br><br>
+        <mat-card-content>
+            <form [formGroup]="form" style="width:100%">
+                <mat-form-field appearance="outline" floatLabel="always">
+                    <mat-label>用户名</mat-label>
+                    <input matInput placeholder="" type="tel" [formControl]="mobile">
+                    <mat-error *ngIf="mobile.hasError('invalid')">{{mobile.errors.msg}}</mat-error>
+                </mat-form-field >
+                <mat-form-field appearance="outline" floatLabel="always">
+                    <mat-label>密码</mat-label>
+                    <input matInput placeholder="" type="text" [formControl]="code">
+                    <mat-error *ngIf="code.hasError('invalid')">{{code.errors.msg}}</mat-error>
+                </mat-form-field>
+            </form>
+        </mat-card-content>
+        <mat-card-actions align="right">
+            <button mat-flat-button color="accent" mat-button (click)="submit()">确定</button>
+        </mat-card-actions>
+    </mat-card>
+</div>
+

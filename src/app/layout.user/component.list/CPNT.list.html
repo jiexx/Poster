@@ -1,0 +1,22 @@
+<br><br><br><br>
+<div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="1rem">
+    <mat-form-field fxFlex appearance="outline" floatLabel="always" style="width:100%">
+        <mat-label>身份证号后4位</mat-label>
+        <input type="text" matInput [formControl]="keyword" #srh>
+        <mat-error *ngIf="keyword.hasError('invalid')">{{keyword.errors.msg}}</mat-error>
+        <!-- <button mat-icon-button matPrefix><mat-icon >person</mat-icon></button> -->
+    </mat-form-field>
+    <div fxFlex="none" style="padding-bottom: 1.3rem"><button mat-flat-button color="primary" (click)="search()" >搜索</button></div>
+</div>
+
+<div style="width: 100%;"> 
+    <mat-card *ngFor="let item of list; let i = index " (click)="detail(item);">
+        <mat-card-header>
+            <mat-card-title>{{item.name}}</mat-card-title>
+            <mat-card-subtitle>电话：{{ item.tel }}</mat-card-subtitle>
+            <mat-card-subtitle>身份证：{{ item.id }}</mat-card-subtitle>
+            <mat-card-subtitle>预约时间：{{ item.datatime }}</mat-card-subtitle>
+            <mat-card-subtitle>来源：{{ item.id }}</mat-card-subtitle>
+        </mat-card-header>
+    </mat-card>
+</div>

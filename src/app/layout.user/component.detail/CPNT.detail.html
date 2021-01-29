@@ -1,0 +1,75 @@
+<br><br><br><br>
+<div fxFill>
+    <mat-card-title>基本信息</mat-card-title>
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title style="width:5.5rem" class="mat-small">姓名：</mat-card-title>
+            <mat-card-title-group>
+                <mat-card-subtitle>{{record.name}}</mat-card-subtitle>
+            </mat-card-title-group>
+        </mat-card-header>
+        <mat-divider style="margin-top: -0.5rem"></mat-divider>
+        <mat-card-header>
+            <mat-card-title style="width:5.5rem">身份证：</mat-card-title>
+            <mat-card-title-group>
+                <mat-card-subtitle>{{userid}}</mat-card-subtitle>
+            </mat-card-title-group>
+        </mat-card-header>
+        <mat-divider style="margin-top: -0.5rem"></mat-divider>
+        <mat-card-header>
+            <mat-card-title style="width:5.5rem">手机号：</mat-card-title>
+            <mat-card-title-group>
+                <mat-card-subtitle>{{record.tel}}</mat-card-subtitle>
+            </mat-card-title-group>
+        </mat-card-header>
+        <mat-divider style="margin-top: -0.5rem"></mat-divider>
+        <mat-card-header>
+            <mat-card-title style="width:5.5rem">家庭住址：</mat-card-title>
+            <mat-card-title-group>
+                <mat-card-subtitle>{{record.address}}</mat-card-subtitle>
+            </mat-card-title-group>
+        </mat-card-header>
+    </mat-card>
+    <br>
+    <mat-card-title>预约信息</mat-card-title>
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title style="width:5.5rem">门诊号：&nbsp;&nbsp;&nbsp;&nbsp;</mat-card-title>
+            <mat-card-title-group>
+                <mat-card-subtitle>{{record.resId}}</mat-card-subtitle>
+            </mat-card-title-group>
+        </mat-card-header>
+        <mat-divider style="margin-top: -0.5rem"></mat-divider>
+        <mat-card-header>
+            <mat-card-title style="width:5.5rem">预约时间：</mat-card-title>
+            <mat-card-title-group>
+                <mat-card-subtitle>{{record.datatime}}</mat-card-subtitle>
+            </mat-card-title-group>
+        </mat-card-header>
+        <mat-divider style="margin-top: -0.5rem"></mat-divider>
+        <mat-card-header style="padding: 0.5rem 0 1rem 0">
+            <mat-card-title style="width:5.5rem">来源：</mat-card-title>
+            <mat-card-title-group>
+                <mat-radio-group #action fxLayoutGap="1rem" style="font-size: 14px;">
+                    <mat-radio-button *ngFor="let key of sourceMapKeys() " style="padding: 0.5rem 0 0.5rem 0" value="key" [checked]="sourceChecked(key)"  (click)="source = key">
+                        {{sourceMap[key]}}
+                    </mat-radio-button>
+                </mat-radio-group>
+            </mat-card-title-group>
+        </mat-card-header>
+        <mat-divider style="margin-top: -0.5rem"></mat-divider>
+        <mat-card-header style="padding: 0.5rem 0 0.5rem 0">
+            <mat-card-title style="width:5.5rem">缴费方式：</mat-card-title>
+            <mat-card-title-group>
+                <mat-radio-group #action fxLayoutGap="1rem" style="font-size: 14px;">
+                    <mat-radio-button *ngFor="let key of paymentMapKeys() " style="padding: 0.5rem 0 0.5rem 0" value="key" [checked]="paymentChecked(key)"  (click)="payment = key">
+                        {{paymentMap[key]}}
+                    </mat-radio-button>
+                </mat-radio-group>
+            </mat-card-title-group>
+        </mat-card-header>
+    </mat-card>
+    <br>
+    <button mat-flat-button matPrefix color="primary" (click)="finish()" style="width:100%">确认缴费方式</button>
+</div>
+<dlg></dlg>
