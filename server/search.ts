@@ -1,7 +1,7 @@
 import * as nodejieba from 'nodejieba';
 import FlexSearch from 'flexsearch'
 import * as path from 'path';
-import { __colName, __db, __dbName } from "db";
+import { __colName, __db, __dbName } from "./db";
 
 export class Search{
     index = null;

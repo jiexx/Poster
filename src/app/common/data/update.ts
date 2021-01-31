@@ -1,7 +1,4 @@
-import { Data } from 'app/common/config';
 import { Injectable, NgModule } from '@angular/core';
-import { _url, _storageurl } from 'app/common/config';
-import { HttpClientModule } from '@angular/common/http';
 import { SwUpdate } from '@angular/service-worker';
 import { interval } from 'rxjs';
 
@@ -34,7 +31,6 @@ export class UpdateService {
 
 @NgModule({
     imports: [
-        HttpClientModule
     ],
     providers: [
         UpdateService

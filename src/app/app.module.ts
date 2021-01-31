@@ -11,6 +11,7 @@ import { UserModule } from './common/data/user';
 import { MatMenuModule } from '@angular/material/menu';
 import { ServiceWorkerModule, SwRegistrationOptions } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { DialogModule } from './common/dialog/dialog.module';
 
 export class HammerConfig extends HammerGestureConfig {
     overrides = <any> {
@@ -31,8 +32,9 @@ export class HammerConfig extends HammerGestureConfig {
         UserModule,
         MatMenuModule,
         HammerModule,
-        ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production, registrationStrategy: 'registerImmediately' })
+        ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production, registrationStrategy: 'registerImmediately' }),
         // LayoutMainModule
+        DialogModule
     ],
     providers: [
         BusService,

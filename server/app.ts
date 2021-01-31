@@ -1,17 +1,16 @@
 const express = require('express');
 import * as bodyParser from 'body-parser';
 import * as https from 'https';
-import * as fs from 'fs';
 import { v4 as uuid } from 'uuid';
 import { resolve } from 'path';
 import { EDataPath, ENetConf, __debug } from '../config';
 import { Mysql, Mongodb } from './database';
 import { readFileSync, promises, existsSync, mkdirSync } from 'fs';
-import { __db, __dbName } from 'db';
-import { Search } from 'search';
+import { __db, __dbName } from './db';
+import { Search } from './search';
 
-const privateKey  = fs.readFileSync('./private.pem', 'utf8');
-const certificate = fs.readFileSync('./file.crt', 'utf8');
+const privateKey  = readFileSync('./private.pem', 'utf8');
+const certificate = readFileSync('./file.crt', 'utf8');
 const credentials = {key: privateKey, cert: certificate};
 
 const app = express();
