@@ -1,36 +1,26 @@
-<div fxLayout="column" fxLayoutAlign="center center" fxFill >
-    <mat-toolbar color="primary" fxLayout="row" fxLayoutAlign="center center"  class="header">
-        <div fxFlex=100 fxLayoutAlign="space-between center" >
-            <nav mat-tab-nav-bar backgroundColor="primary" fxFlex="none" >
-                <a mat-tab-link  (click)="changeMode('readonly')"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
-                    <div><div *ngIf="mode=='confirm'"><返回</div></div>
-                </a>
-            </nav>
-            <nav mat-tab-nav-bar backgroundColor="primary" fxFlex="none" >
-                <a><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
-                    <div>{{title}}</div>
-                </a>
-            </nav>
-            <nav mat-tab-nav-bar backgroundColor="primary" fxFlex="none" >
-                <a mat-tab-link  (click)="logout()"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
-                    <div><div *ngIf="mode=='readonly'">注销</div></div>
-                </a>
-            </nav>
-        </div>
+<div fxLayout="column" fxLayoutAlign="center center" >
+    <mat-toolbar fxFlex color="primary">
+        <!-- <mat-form-field>
+            <input type="text" matInput [formControl]="keyword">
+            <mat-error *ngIf="keyword.hasError('invalid')">{{keyword.errors.msg}}</mat-error>
+            <button mat-button matSuffix (click)="search()" style="width:100%"><mat-icon>search</mat-icon></button>
+        </mat-form-field> -->
+        <button mat-button><mat-icon>add</mat-icon></button>
     </mat-toolbar>
-    <div fxFlex="grow" style="width:100%;padding: 1rem">
+    <mat-toolbar fxFlex color="primary">
+        <nav mat-tab-nav-bar backgroundColor="primary">
+            <a mat-tab-link [active]="at==0" (click)="at=0"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
+                <div>推荐</div>
+            </a>
+            <a mat-tab-link [active]="at==1" (click)="at=1">
+                <div>客户</div>
+            </a>
+            <a mat-tab-link [active]="at==2" (click)="at=2">
+                <div>我</div>
+            </a>
+        </nav>
+    </mat-toolbar>
+    <div fxFlex="grow">
         <router-outlet #o="outlet" ></router-outlet>  
     </div>
-    <mat-toolbar color="primary" fxLayout="row" fxLayoutAlign="center center" class="footer" *ngIf="mode=='readonly' || mode =='editable'">
-        <div fxFlex=70 fxLayout="row" fxLayoutAlign="space-between center" >
-            <nav mat-tab-nav-bar backgroundColor="primary" fxFlex fxLayout="row" fxLayoutAlign="center center">
-                <a mat-tab-link fxFlex="50"  (click)="changeMode('readonly')"  [active]="!at"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
-                    <div>搜索</div>
-                </a>
-                <a mat-tab-link fxFlex="50"  (click)="input()"  [active]="!at"><!-- (click)="changeMode('editable')"[routerLinkActiveOptions]="{exact:true}"  > -->
-                    <div>录入</div>
-                </a>
-            </nav>
-        </div>
-    </mat-toolbar>
 </div>

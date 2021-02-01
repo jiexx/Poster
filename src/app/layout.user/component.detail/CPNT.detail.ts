@@ -2,7 +2,6 @@ import { Component, AfterViewInit, ChangeDetectorRef, OnInit } from '@angular/co
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { UserService } from 'app/common/data/user';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { SourceMap, PaymentMap, Constants } from 'app/common/config';
 import { Router, ActivatedRoute } from '@angular/router';
 import { enterTransition } from '../router.animation';
 import { IColumn } from 'app/common/table/CPNT.table';
@@ -55,43 +54,10 @@ export class CDetail  extends Bus implements OnInit {
     userid = null;
 
     ngAfterViewInit(){
-        
-        this.userid = this.route.snapshot.queryParamMap.get('userid');
-        this.record.name = this.route.snapshot.queryParamMap.get('name');
-        this.record.tel = this.route.snapshot.queryParamMap.get('tel');
-        this.record.address = this.route.snapshot.queryParamMap.get('address');
-        this.record.source = this.route.snapshot.queryParamMap.get('source');
-        this.source = this.record.source.replace('come-','')
-        this.record.datatime = this.route.snapshot.queryParamMap.get('datatime');
-        this.record.resId = this.route.snapshot.queryParamMap.get('resId');
-        this.record.uid = this.route.snapshot.queryParamMap.get('uid');
-        this.payment = this.route.snapshot.queryParamMap.get('payment');
+       
     }
     today(){
         return new Date().toLocaleDateString()
     }
-    paymentMapKeys(){
-        return Object.keys(this.paymentMap);
-    }
-    sourceMapKeys(){
-        return Object.keys(this.sourceMap);
-    }
-    paymentChecked(key){
-        return this.payment == key;
-    }
-    sourceChecked(key){
-        return this.source == key;
-    }
-    payment = '';
-    source = '';
-    paymentMap = Constants.PaymentMap || PaymentMap;
-    sourceMap = Constants.SourceMap || SourceMap;
-    async finish(){
-        try {
-            const done = await this.user.confirmPayment(this.record.uid, this.record.resId, this.payment as any);
-            this.bus.send('CDialog', <IDialogMessage>{command: 'open', data: {CPNT: CInfo, button: '', returnto: this, title: '提示', info: JSON.stringify('付款方式修改完成！')} })
-        }catch(err){
-            console.log('detail finish', err);
-        }
-    }
+
 }

@@ -1,7 +1,6 @@
 import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { UserService } from 'app/common/data/user';
-import { Constants } from 'app/common/config';
 import { Router, ActivatedRoute } from '@angular/router';
 
 
@@ -34,20 +33,7 @@ export class CList implements OnInit {
         mobileValidator
     ]);
     ngAfterViewInit(){
-        this.user.download('https://z3.shneuro.cn:36021/z3html/js/z3/values.json?bust=20170719102740').then((json: any) => {
-            Constants.SourceMap = json.visit.props.values.comeSource;
-            Constants.PaymentMap = json.reservation.props.values.NATPayType;
-            Object.keys(Constants.SourceMap).forEach(src => {
-                if(Constants.SourceMap[src].includes('作废')) {
-                    delete Constants.SourceMap[src]
-                }
-            })
-            console.log('Constants.SourceMap', Constants.SourceMap, json)
-        })
-        this.user.configGet('natDoctor').then(doctorId => {
-            Constants.DoctorId = doctorId;
-            console.log('Constants.DoctorId', Constants.DoctorId);
-        })
+        
     }
     getList(){
     }

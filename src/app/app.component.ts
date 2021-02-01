@@ -13,7 +13,7 @@ import { CInfo } from './common/dialog/CPNT.info';
 })
 export class AppComponent extends Bus implements AfterContentChecked {
     name(): string {
-        throw new Error("Method not implemented.");
+        return 'AppComponent';
     }
     constructor(public user: UserService, private cdr: ChangeDetectorRef, private router: Router, private route: ActivatedRoute, protected bus: BusService) {
         super(bus);

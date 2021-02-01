@@ -51,8 +51,8 @@
             <mat-card-title style="width:5.5rem">来源：</mat-card-title>
             <mat-card-title-group>
                 <mat-radio-group #action fxLayoutGap="1rem" style="font-size: 14px;">
-                    <mat-radio-button *ngFor="let key of sourceMapKeys() " style="padding: 0.5rem 0 0.5rem 0" value="key" [checked]="sourceChecked(key)"  (click)="source = key">
-                        {{sourceMap[key]}}
+                    <mat-radio-button>
+                        
                     </mat-radio-button>
                 </mat-radio-group>
             </mat-card-title-group>
@@ -62,14 +62,11 @@
             <mat-card-title style="width:5.5rem">缴费方式：</mat-card-title>
             <mat-card-title-group>
                 <mat-radio-group #action fxLayoutGap="1rem" style="font-size: 14px;">
-                    <mat-radio-button *ngFor="let key of paymentMapKeys() " style="padding: 0.5rem 0 0.5rem 0" value="key" [checked]="paymentChecked(key)"  (click)="payment = key">
-                        {{paymentMap[key]}}
-                    </mat-radio-button>
+                    
                 </mat-radio-group>
             </mat-card-title-group>
         </mat-card-header>
     </mat-card>
     <br>
-    <button mat-flat-button matPrefix color="primary" (click)="finish()" style="width:100%">确认缴费方式</button>
 </div>
 <dlg></dlg>

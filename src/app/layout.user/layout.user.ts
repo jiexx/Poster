@@ -5,7 +5,13 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { IBus, BusService, IBusMessage, Bus } from 'app/common/bus/bus';
 import { enterTransition } from './router.animation';
 import { UserService } from 'app/common/data/user';
+import { FormControl } from '@angular/forms';
 
+const kwValidator = (control: FormControl):{[key:string]: boolean | string} =>{
+    if(!control.value) {
+        return {invalid: true, msg: '不能为空'};
+    }
+}
 
 @Component({
     templateUrl: './layout.user.html',
@@ -43,6 +49,12 @@ export class LayoutLogin implements OnDestroy  {
         });
     }
     ngOnDestroy(): void {
+    }
+    keyword = new FormControl('xxx', [
+        kwValidator
+    ]);
+    search(){
+
     }
     mode = 'readonly';
     title = '';
