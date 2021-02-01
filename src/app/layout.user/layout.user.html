@@ -1,24 +1,27 @@
-<div fxLayout="column" fxLayoutAlign="center center" >
-    <mat-toolbar fxFlex color="primary">
-        <!-- <mat-form-field>
-            <input type="text" matInput [formControl]="keyword">
-            <mat-error *ngIf="keyword.hasError('invalid')">{{keyword.errors.msg}}</mat-error>
-            <button mat-button matSuffix (click)="search()" style="width:100%"><mat-icon>search</mat-icon></button>
-        </mat-form-field> -->
-        <button mat-button><mat-icon>add</mat-icon></button>
-    </mat-toolbar>
-    <mat-toolbar fxFlex color="primary">
-        <nav mat-tab-nav-bar backgroundColor="primary">
-            <a mat-tab-link [active]="at==0" (click)="at=0"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
-                <div>推荐</div>
-            </a>
-            <a mat-tab-link [active]="at==1" (click)="at=1">
-                <div>客户</div>
-            </a>
-            <a mat-tab-link [active]="at==2" (click)="at=2">
-                <div>我</div>
-            </a>
-        </nav>
+<div fxLayout="column" fxLayoutAlign="center stretch" fxFill>
+    <mat-toolbar fxFlex="none" color="primary">
+        <mat-toolbar-row>
+            <mat-form-field >
+                <input type="search" matInput [formControl]="keyword"/>
+                <mat-error *ngIf="keyword.hasError('invalid')">{{keyword.errors.msg}}</mat-error>
+                <button mat-icon-button matPrefix (click)="search()"><mat-icon>search</mat-icon></button>
+                <button mat-icon-button matSuffix><mat-icon>add</mat-icon></button>
+            </mat-form-field>
+            
+        </mat-toolbar-row>
+        <mat-toolbar-row>
+            <nav mat-tab-nav-bar backgroundColor="primary">
+                <a mat-tab-link [active]="at==0" (click)="at=0"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
+                    <div>推荐</div>
+                </a>
+                <a mat-tab-link [active]="at==1" (click)="at=1">
+                    <div>客户</div>
+                </a>
+                <a mat-tab-link [active]="at==2" (click)="at=2">
+                    <div>我</div>
+                </a>
+            </nav>
+        </mat-toolbar-row>
     </mat-toolbar>
     <div fxFlex="grow">
         <router-outlet #o="outlet" ></router-outlet>  

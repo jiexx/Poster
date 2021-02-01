@@ -1,7 +1,7 @@
 .mat-subheading-2 {
     margin: 0
 }
-mat-toolbar {
+mat-toolbar-row {
     height: auto;
 }
 mat-form-field {

@@ -50,7 +50,7 @@ export class LayoutLogin implements OnDestroy  {
     }
     ngOnDestroy(): void {
     }
-    keyword = new FormControl('xxx', [
+    keyword = new FormControl('', [
         kwValidator
     ]);
     search(){
