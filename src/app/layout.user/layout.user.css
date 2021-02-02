@@ -3,13 +3,16 @@
 }
 ::ng-deep mat-toolbar-row .mat-form-field-wrapper {
     padding: 0;
-    background-color: white;
-    border: 2px solid black;
 }
-   
-
+::ng-deep mat-toolbar-row .mat-form-field-outline {
+    background-color: white;
+    border-radius: 36px;
+}
 mat-form-field {
     width: 100%;
+}
+.mat-toolbar-row {
+    height: auto;
 }
 .mat-button-wrapper {
     margin-top: -12px;
