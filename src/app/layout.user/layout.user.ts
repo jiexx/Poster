@@ -31,7 +31,7 @@ const kwValidator = (control: FormControl):{[key:string]: boolean | string} =>{
         )
     ],
 })
-export class LayoutLogin implements OnDestroy  {
+export class LayoutUser implements OnDestroy  {
     at = 0;
     constructor(private user : UserService, private location: Location, private router: Router, protected bus: BusService, private route: ActivatedRoute) {
         // this.router.navigate(['/user/list'], {queryParams: {mode: this.mode}})

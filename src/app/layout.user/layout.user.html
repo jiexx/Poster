@@ -1,13 +1,14 @@
 <div fxLayout="column" fxLayoutAlign="center stretch" fxFill>
     <mat-toolbar fxFlex="none" color="primary">
         <mat-toolbar-row>
-            <mat-form-field >
+            <mat-form-field appearance="outline" color="white">
                 <input type="search" matInput [formControl]="keyword"/>
                 <mat-error *ngIf="keyword.hasError('invalid')">{{keyword.errors.msg}}</mat-error>
-                <button mat-icon-button matPrefix (click)="search()"><mat-icon>search</mat-icon></button>
-                <button mat-icon-button matSuffix><mat-icon>add</mat-icon></button>
+                <button mat-icon-button matSuffix (click)="search()"><mat-icon>search</mat-icon></button>
             </mat-form-field>
-            
+            <div class="mat-button-wrapper">
+                <button mat-icon-button class="mat-button-suffix"><mat-icon class="mat-icon-suffix">add</mat-icon></button>
+            </div>
         </mat-toolbar-row>
         <mat-toolbar-row>
             <nav mat-tab-nav-bar backgroundColor="primary">

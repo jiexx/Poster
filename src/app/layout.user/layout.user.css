@@ -1,9 +1,26 @@
-.mat-subheading-2 {
-    margin: 0
+::ng-deep mat-toolbar-row .mat-form-field-infix { 
+    padding: 0.4em 0px !important;
 }
-mat-toolbar-row {
-    height: auto;
+::ng-deep mat-toolbar-row .mat-form-field-wrapper {
+    padding: 0;
+    background-color: white;
+    border: 2px solid black;
 }
+   
+
 mat-form-field {
     width: 100%;
+}
+.mat-button-wrapper {
+    margin-top: -12px;
+}
+.mat-button-suffix {
+    width: 30px !important;
+    height: 30px !important;
+    line-height: 30px !important;
+}
+.mat-icon-suffix {
+    width: 20px !important;
+    height: 22.5px !important;
+    font-size: 20px !important;
 }

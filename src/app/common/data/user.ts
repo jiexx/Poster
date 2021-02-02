@@ -102,9 +102,9 @@ export class UserService {
 
     constructor(public router : Router, public http: HttpClient){
         this.data = new Data(http);
-        if(!this.myId()){
+        /* if(!this.myId()){
             this.router.navigate(['/user/login'])
-        }
+        } */
     }
     data : Data;
     myId(){

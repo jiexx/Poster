@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { LayoutLogin } from './layout.user/layout.user';
+import { LayoutUser } from './layout.user/layout.user';
 
 const routes: Routes = [
     {
         path: 'user',
-        component: LayoutLogin,
-        loadChildren: () => import('./layout.user/layout.user.module').then(mod => mod.LayoutLoginModule)
+        component: LayoutUser,
+        loadChildren: () => import('./layout.user/layout.user.module').then(mod => mod.LayoutUserModule)
     },
     {
         path: '',

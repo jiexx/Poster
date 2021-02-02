@@ -8,7 +8,7 @@ import { FlexLayoutModule } from "@angular/flex-layout";
 import { LayoutRoutingModule } from './layout.user-routings.module';
 import { CommonModule } from '@angular/common';
 import { CLogin } from './component.login/CPNT.login';
-import { LayoutLogin } from './layout.user';
+import { LayoutUser } from './layout.user';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -42,7 +42,7 @@ import { CInput } from './component.input/CPNT.input';
         DialogModule,
     ],
     declarations: [
-        LayoutLogin,
+        LayoutUser,
         CLogin,
         CList,
         CDetail,
@@ -51,4 +51,4 @@ import { CInput } from './component.input/CPNT.input';
     
     
 })
-export class LayoutLoginModule { }
+export class LayoutUserModule { }

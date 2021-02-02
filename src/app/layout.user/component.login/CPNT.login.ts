@@ -45,7 +45,6 @@ export class CLogin implements AfterViewInit {
     }
     bg: string = './assets/img/bg.jpg';
     ngAfterViewInit(){
-        
         if(this.user.myId()){
             this.router.navigate(['/user/list'], {queryParams: {mode: 'readonly'}})
         }
@@ -62,11 +61,10 @@ export class CLogin implements AfterViewInit {
     });
     submit(){
         if(this.form.valid) {
-            this.user.login(this.mobile.value, this.code.value).then(res =>{
-                if(res){
-                    this.router.navigate(['/user/list'],{queryParams: {mode: 'readonly'}})
-                }
-            });
+            /* this.user.login(this.mobile.value, this.code.value).then(res =>{
+                
+            }); */
+            this.router.navigate(['/user/list'],{queryParams: {mode: 'readonly'}})
         }else {
             this.form.markAllAsTouched();
         }
