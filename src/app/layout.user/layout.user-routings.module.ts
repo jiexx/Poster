@@ -47,30 +47,7 @@ export const routeConfig = [
         pathMatch: 'full',
     }
 ];
-const routes: Routes = [
-    {
-        path: 'list',
-        component: CList,
-    },
-    {
-        path: 'detail',
-        component: CDetail
-    },
-    {
-        path: 'input',
-        component: CInput,
-        canActivate: [AuthGuard],
-    },
-    {
-        path: 'login',
-        component: CLogin
-    },
-    {
-        path: '',
-        redirectTo: 'list',
-        pathMatch: 'full',
-    }
-];
+const routes: Routes = routeConfig.map(rc => rc.mode ? {path:rc.path, component: rc.component, canActivate: rc.canActivate} : rc);
 
 @NgModule({
     imports: [

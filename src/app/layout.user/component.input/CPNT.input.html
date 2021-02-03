@@ -1,110 +1,17 @@
-<br><br><br><br>
-<div fxFill>
-    <mat-card-title>基本信息</mat-card-title>
-    <mat-card>
-        <mat-card-header>
-            <mat-card-title style="width:4.5rem;margin-top: 1.5rem">姓名：</mat-card-title>
-            <div style="width:100%">
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <input type="text" matInput [formControl]="username">
-                    <mat-error *ngIf="username.hasError('invalid')">{{username.errors.msg}}</mat-error>
-                </mat-form-field>
-            </div>
-        </mat-card-header>
-        <mat-card-header>
-            <mat-card-title style="width:4.5rem;">性别：</mat-card-title>
-            <mat-card-title-group>
-                <mat-radio-group #action fxLayoutGap="1rem" style="font-size: 14px;">
-                    <mat-radio-button  value="male" [checked]="gender == 'male'"  (click)="gender = 'male'">
-                        男
-                    </mat-radio-button>
-                    <mat-radio-button  value="female" [checked]="gender == 'female'"  (click)="gender = 'female'">
-                        女
-                    </mat-radio-button>
-                </mat-radio-group>
-            </mat-card-title-group>
-        </mat-card-header>
-        <mat-divider style="margin-top: -0.5rem"></mat-divider>
-        <mat-card-header>
-            <mat-card-title style="width:4.5rem;margin-top: 1.5rem">身份证：</mat-card-title>
-            <div style="width:100%">
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <input type="text" matInput [formControl]="userid">
-                    <mat-error *ngIf="userid.hasError('invalid')">{{userid.errors.msg}}</mat-error>
-                </mat-form-field>
-            </div>
-        </mat-card-header>
-        <mat-card-header>
-            <mat-card-title style="width:4.5rem;">生日：</mat-card-title>
-            <div style="width:100%">
-                <div>{{birthDay}}</div>
-            </div>
-        </mat-card-header>
-        <mat-divider style="margin-top: -0.5rem"></mat-divider>
-        <mat-card-header>
-            <mat-card-title style="width:4.5rem;margin-top: 1.5rem">手机号：</mat-card-title>
-            <div style="width:100%">
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <input type="text" matInput [formControl]="mobile">
-                    <mat-error *ngIf="mobile.hasError('invalid')">{{mobile.errors.msg}}</mat-error>
-                </mat-form-field>
-            </div>
-        </mat-card-header>
-        <mat-divider style="margin-top: -0.5rem"></mat-divider>
-        <mat-card-header>
-            <mat-card-title style="width:4.5rem;margin-top: 1.5rem">省份：</mat-card-title>
-            <div style="width:100%">
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <input type="text" matInput [formControl]="province">
-                    <mat-error *ngIf="province.hasError('invalid')">{{province.errors.msg}}</mat-error>
-                </mat-form-field>
-            </div>
-        </mat-card-header>
-        <mat-divider style="margin-top: -0.5rem"></mat-divider>
-        <mat-card-header>
-            <mat-card-title style="width:4.5rem;margin-top: 1.5rem">市：</mat-card-title>
-            <div style="width:100%">
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <input type="text" matInput [formControl]="city">
-                    <mat-error *ngIf="city.hasError('invalid')">{{city.errors.msg}}</mat-error>
-                </mat-form-field>
-            </div>
-        </mat-card-header>
-        <mat-divider style="margin-top: -0.5rem"></mat-divider>
-        <mat-card-header>
-            <mat-card-title style="width:4.5rem;margin-top: 1.5rem">区：</mat-card-title>
-            <div style="width:100%">
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <input type="text" matInput [formControl]="district">
-                    <mat-error *ngIf="district.hasError('invalid')">{{district.errors.msg}}</mat-error>
-                </mat-form-field>
-            </div>
-        </mat-card-header>
-        <mat-divider style="margin-top: -0.5rem"></mat-divider>
-        <mat-card-header>
-            <mat-card-title style="width:4.5rem;margin-top: 1.5rem">家庭住址：</mat-card-title>
-            <div style="width:100%">
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <input type="text" matInput [formControl]="address">
-                    <mat-error *ngIf="address.hasError('invalid')">{{address.errors.msg}}</mat-error>
-                </mat-form-field>
-            </div>
-        </mat-card-header>
-    </mat-card>
-    <br>
-    <mat-card-title>预约信息</mat-card-title>
-    <mat-card>
-        <mat-divider style="margin-top: -0.5rem"></mat-divider>
-        <mat-card-header>
-            <mat-card-title style="width:5.5rem">预约时间：</mat-card-title>
-            <mat-card-title-group>
-                <mat-card-subtitle>{{today()}}</mat-card-subtitle>
-            </mat-card-title-group>
-        </mat-card-header>
-        <mat-divider style="margin-top: -0.5rem"></mat-divider>
-    </mat-card>
-    <br>
-    <button mat-flat-button color="primary" style="width:100%" (click)="finish()">确认缴费方式</button>
-    <br><br><br><br><br><br>
+<div fxLayout="column" fxLayoutAlign="start stretch" fxFill>
+    <nav fxFlex="none" mat-tab-nav-bar backgroundColor="primary">
+        <a mat-tab-link (click)="at=0">
+            <mat-icon>save</mat-icon>
+        </a>
+        <a mat-tab-link (click)="at=1">
+            <mat-icon>download</mat-icon>
+        </a>
+        <a mat-tab-link (click)="at=2">
+            <mat-icon>text_fields</mat-icon>
+        </a>
+        <div fxFlex></div>
+        <a mat-tab-link (click)="at=3; back();">
+            <mat-icon>close</mat-icon>
+        </a>
+    </nav>
 </div>
-<dlg></dlg>

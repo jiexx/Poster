@@ -1,11 +1,12 @@
 import { Component, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 import { Location } from '@angular/common';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { IBus, BusService, IBusMessage, Bus } from 'app/common/bus/bus';
 import { enterTransition } from './router.animation';
 import { UserService } from 'app/common/data/user';
 import { FormControl } from '@angular/forms';
+import { routeConfig } from './layout.user-routings.module';
 
 const kwValidator = (control: FormControl):{[key:string]: boolean | string} =>{
     if(!control.value) {
@@ -40,7 +41,9 @@ export class LayoutUser implements OnDestroy  {
             
         }); */
         this.route.url.subscribe((e) => {
-            
+            const cfg = routeConfig.find(rc => '/user/'+rc.path == this.route.snapshot['_routerState'].url)
+            this.mode = cfg.mode as any || 'seller';
+            console.log('this.route', cfg.mode)
         });
     }
     ngOnDestroy(): void {
