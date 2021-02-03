@@ -12,6 +12,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { ServiceWorkerModule, SwRegistrationOptions } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { DialogModule } from './common/dialog/dialog.module';
+import { AuthGuard } from './layout.user/layout.user-routings.module';
 
 export class HammerConfig extends HammerGestureConfig {
     overrides = <any> {
@@ -38,6 +39,7 @@ export class HammerConfig extends HammerGestureConfig {
     ],
     providers: [
         BusService,
+        AuthGuard,
         {
             provide: HAMMER_GESTURE_CONFIG,
             useClass: HammerConfig

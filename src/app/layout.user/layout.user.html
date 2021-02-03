@@ -1,13 +1,12 @@
 <div fxLayout="column" fxLayoutAlign="center stretch" fxFill>
-    <mat-toolbar fxFlex="none" color="primary">
-        <mat-toolbar-row>
+    <mat-toolbar fxFlex="none" color="primary" *ngIf="mode=='seller'">
+        <mat-toolbar-row class="title">
             <mat-form-field appearance="outline" color="white">
                 <input type="search" matInput [formControl]="keyword"/>
-                <mat-error *ngIf="keyword.hasError('invalid')">{{keyword.errors.msg}}</mat-error>
                 <button mat-icon-button matSuffix (click)="search()"><mat-icon>search</mat-icon></button>
             </mat-form-field>
-            <div class="mat-button-wrapper">
-                <button mat-icon-button class="mat-button-suffix"><mat-icon class="mat-icon-suffix">add</mat-icon></button>
+            <div class="title-button-wrapper">
+                <button mat-icon-button class="title-button-suffix" [routerLink]="['/user/input']"><mat-icon class="title-icon-suffix">add</mat-icon></button>
             </div>
         </mat-toolbar-row>
         <mat-toolbar-row>
@@ -17,6 +16,39 @@
                 </a>
                 <a mat-tab-link [active]="at==1" (click)="at=1">
                     <div>客户</div>
+                </a>
+                <a mat-tab-link [active]="at==2" (click)="at=2">
+                    <div>我</div>
+                </a>
+            </nav>
+        </mat-toolbar-row>
+    </mat-toolbar>
+    <nav fxFlex="none" mat-tab-nav-bar backgroundColor="primary" *ngIf="mode=='editor'">
+        <a mat-tab-link [active]="at==0" (click)="at=0">
+            <mat-icon>save</mat-icon>
+        </a>
+        <a mat-tab-link [active]="at==1" (click)="at=1">
+            <mat-icon>download</mat-icon>
+        </a>
+        <a mat-tab-link [active]="at==2" (click)="at=2">
+            <mat-icon>text_fields</mat-icon>
+        </a>
+        <div fxFlex></div>
+        <a mat-tab-link [active]="at==3" (click)="at=3">
+            <mat-icon>close</mat-icon>
+        </a>
+    </nav>
+    <mat-toolbar fxFlex="none" color="primary" *ngIf="mode=='customer'">
+        <mat-toolbar-row class="title">
+            <mat-form-field appearance="outline" color="white">
+                <input type="search" matInput [formControl]="keyword"/>
+                <button mat-icon-button matSuffix (click)="search()"><mat-icon>search</mat-icon></button>
+            </mat-form-field>
+        </mat-toolbar-row>
+        <mat-toolbar-row>
+            <nav mat-tab-nav-bar backgroundColor="primary">
+                <a mat-tab-link [active]="at==0" (click)="at=0"> 
+                    <div>推荐</div>
                 </a>
                 <a mat-tab-link [active]="at==2" (click)="at=2">
                     <div>我</div>

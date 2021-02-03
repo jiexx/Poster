@@ -135,6 +135,9 @@ export class UserService {
     logout(){
         localStorage.removeItem('logined');
     }
+    debugLogin(){
+        localStorage.setItem('logined', JSON.stringify({id:1}));
+    }
     async login(username, password){
         let result =  await this.data.remote.postSync(EDataPath.QUERY, [null,"staff","passwordLogin",[username,password,3600]]);
         if(result && result.result && result.result.length > 0){

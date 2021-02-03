@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { UserService } from 'app/common/data/user';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { IResult } from 'app/common/config';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 import { enterTransition } from '../router.animation';
 
 
@@ -45,9 +45,6 @@ export class CLogin implements AfterViewInit {
     }
     bg: string = './assets/img/bg.jpg';
     ngAfterViewInit(){
-        if(this.user.myId()){
-            this.router.navigate(['/user/list'], {queryParams: {mode: 'readonly'}})
-        }
     }
     mobile = new FormControl('', [
         mobileValidator
@@ -64,7 +61,11 @@ export class CLogin implements AfterViewInit {
             /* this.user.login(this.mobile.value, this.code.value).then(res =>{
                 
             }); */
-            this.router.navigate(['/user/list'],{queryParams: {mode: 'readonly'}})
+            this.user.debugLogin();
+            const url = this.route.snapshot.queryParamMap.get('returnUrl');
+            if(url) {
+                this.router.navigate([url]);
+            }
         }else {
             this.form.markAllAsTouched();
         }
