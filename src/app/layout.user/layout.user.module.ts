@@ -13,6 +13,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { DialogModule } from 'app/common/dialog/dialog.module';
+import { SheetModule } from 'app/common/sheet/sheet.module';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
@@ -40,6 +41,7 @@ import { CInput } from './component.input/CPNT.input';
         MatDividerModule,
         MatRadioModule,
         DialogModule,
+        SheetModule
     ],
     declarations: [
         LayoutUser,

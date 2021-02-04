@@ -2,7 +2,6 @@
 import { IDialogMessage, IDialog } from './ITF.dialog';
 import { Bus, BusService } from '../bus/bus';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 
 
 
@@ -24,10 +23,10 @@ export class CDialog extends Bus implements IDialog,  OnInit, OnDestroy  {
     }
     contentref: ComponentRef<any>;
     @ViewChild('content', { read: ViewContainerRef }) content: ViewContainerRef;
-    constructor(protected bus: BusService, public dialog: MatDialog, public sheet: MatBottomSheet, private resolver: ComponentFactoryResolver){
+    constructor(protected bus: BusService, public dialog: MatDialog, private resolver: ComponentFactoryResolver){
         super(bus)
     }
-    ref: MatDialogRef<IDialog, any> | MatBottomSheetRef<IDialog, any> = null;
+    ref: MatDialogRef<IDialog, any> = null;
     msg: IDialogMessage;
     open(msg: IDialogMessage) {
         if(msg.data.CPNT){
@@ -40,7 +39,7 @@ export class CDialog extends Bus implements IDialog,  OnInit, OnDestroy  {
                 _this.ref['componentInstance'] && _this.ref['componentInstance'].close();
                 _this.dialog.closeAll();
                 if(msg.data && msg.data.returnto){
-                    _this.bus.send(Object.prototype.toString.call(msg.data.returnto) === "[object String]" ? msg.data.returnto as any : this.msg.data.returnto.name(), { command : _this.msg.data.cb || 'onDlgClose',  data:{action: _this.msg.data.action, appendix: _this.msg.data.appendix}});
+                    _this.bus.send(Object.prototype.toString.call(msg.data.returnto) === "[object String]" ? msg.data.returnto as any : _this.msg.data.returnto.name(), { command : _this.msg.data.cb || 'onDlgClose',  data:{action: _this.msg.data.action, appendix: _this.msg.data.appendix}});
                 }
                 if(msg.data && msg.data.alias){
                     _this.bus.send(msg.data.alias, { command : _this.msg.data.cb || 'onDlgClose',  data:{action: _this.msg.data.action, appendix: _this.msg.data.appendix}});
@@ -53,21 +52,6 @@ export class CDialog extends Bus implements IDialog,  OnInit, OnDestroy  {
         //     this.contentref = this.content.createComponent(factory);
         //     this.contentref.instance.msg = this.msg;
         // }
-    }
-    pop(msg: IDialogMessage){
-        if(msg.data.CPNT){
-            this.msg = msg;
-            this.ref = this.sheet.open(msg.data.CPNT);
-            const _this = this;
-            this.ref.afterDismissed().subscribe(result => {
-                if(msg.data && msg.data.returnto){
-                    _this.bus.send(Object.prototype.toString.call(msg.data.returnto) === "[object String]" ? msg.data.returnto as any : this.msg.data.returnto.name(), { command : _this.msg.data.cb || 'onDlgClose',  data:{action: _this.msg.data.action, appendix: _this.msg.data.appendix}});
-                }
-                if(msg.data && msg.data.alias){
-                    _this.bus.send(msg.data.alias, { command : _this.msg.data.cb || 'onDlgClose',  data:{action: _this.msg.data.action, appendix: _this.msg.data.appendix}});
-                }
-            });
-        }
     }
     close(){
         this.dialog.closeAll();

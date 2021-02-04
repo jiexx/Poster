@@ -1,17 +1,31 @@
 <div fxLayout="column" fxLayoutAlign="start stretch" fxFill>
     <nav fxFlex="none" mat-tab-nav-bar backgroundColor="primary">
-        <a mat-tab-link (click)="at=0">
+        <a mat-tab-link (click)="save()">
             <mat-icon>save</mat-icon>
         </a>
-        <a mat-tab-link (click)="at=1">
+        <a mat-tab-link (click)="open()">
             <mat-icon>download</mat-icon>
         </a>
-        <a mat-tab-link (click)="at=2">
+        <a mat-tab-link (click)="edit()">
             <mat-icon>text_fields</mat-icon>
         </a>
         <div fxFlex></div>
-        <a mat-tab-link (click)="at=3; back();">
+        <a mat-tab-link (click)="back();">
             <mat-icon>close</mat-icon>
         </a>
     </nav>
 </div>
+<sheet [show]="popup">
+    <form [formGroup]="form" style="width:100%" sheet-item>
+        <mat-form-field  floatLabel="always">
+            <mat-label>用户名</mat-label>
+            <input matInput placeholder="" type="tel" [formControl]="mobile">
+            <mat-error *ngIf="mobile.hasError('invalid')">{{mobile.errors.msg}}</mat-error>
+        </mat-form-field >
+        <mat-form-field  floatLabel="always">
+            <mat-label>密码</mat-label>
+            <input matInput placeholder="" type="text" [formControl]="code">
+            <mat-error *ngIf="code.hasError('invalid')">{{code.errors.msg}}</mat-error>
+        </mat-form-field>
+    </form>
+</sheet>
