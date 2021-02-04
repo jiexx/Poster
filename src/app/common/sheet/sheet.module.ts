@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { MatBottomSheetModule, MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
 import { CSheet } from './CPNT.sheet';
 import { DSheet } from './DIR.sheet';
-import { CContainer } from './CPNT.container';
 
 @NgModule({
     imports: [
@@ -13,7 +12,6 @@ import { CContainer } from './CPNT.container';
     declarations: [
         DSheet,
         CSheet,
-        CContainer,
     ],
     exports: [
         DSheet, 

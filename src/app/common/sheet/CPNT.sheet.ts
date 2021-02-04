@@ -1,16 +1,19 @@
-import { Component, Input, ViewChild, ElementRef, ContentChild, OnChanges } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, ContentChild, OnChanges, ViewContainerRef } from '@angular/core';
 import { DSheet } from './DIR.sheet';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { CContainer } from './CPNT.container';
 
 
 @Component({
     selector: 'sheet',
-    template: ``,
+    template:
+        `<div >
+            <ng-content select="[sheet-item]" #container ></ng-content>   
+        </div>`,
 })
 export class CSheet implements OnChanges {
     @Input() show: boolean = false;
-    
+    @ViewChild('container') container: ViewContainerRef;
+    @ContentChild(DSheet) item : DSheet;
     constructor(private bottomsheet: MatBottomSheet) {
         
     }
@@ -20,7 +23,7 @@ export class CSheet implements OnChanges {
         }
     }
     open(): void {
-        const bottomSheetRef = this.bottomsheet.open(CContainer);
+        const bottomSheetRef = this.bottomsheet.open(null, {viewContainerRef: this.container});
         bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {
             console.log('dataFromChild');
             this.show = false;
