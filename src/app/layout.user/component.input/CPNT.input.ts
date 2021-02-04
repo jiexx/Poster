@@ -32,12 +32,12 @@ export class CInput extends Bus  implements OnInit {
         mobile: this.mobile,
         code: this.code
     });
-    popup = false;
+    popup = null;
     constructor(private location: Location, protected bus: BusService){
         super(bus);
     }
     save(){
-        this.popup = true;
+        this.popup = {};
     }
     open(){
 
