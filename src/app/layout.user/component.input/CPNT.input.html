@@ -16,16 +16,44 @@
     </nav>
 </div>
 <sheet [data]="popup">
-    <form [formGroup]="form" style="width:100%" sheet-item>
-        <mat-form-field  floatLabel="always">
-            <mat-label>用户名</mat-label>
-            <input matInput placeholder="" type="tel" [formControl]="mobile">
+    <form [formGroup]="formPopup" style="width:100%" sheet-item>
+        <mat-form-field>
+            <input matInput placeholder="名称" type="tel" [formControl]="mobile">
+            <mat-icon matPrefix color="accent">priority_high</mat-icon>
             <mat-error *ngIf="mobile.hasError('invalid')">{{mobile.errors.msg}}</mat-error>
         </mat-form-field >
-        <mat-form-field  floatLabel="always">
-            <mat-label>密码</mat-label>
-            <input matInput placeholder="" type="text" [formControl]="code">
+        <mat-form-field>
+            <input matInput placeholder="价格" type="text" [formControl]="code">
+            <mat-icon matPrefix color="accent">monetization_on</mat-icon>
             <mat-error *ngIf="code.hasError('invalid')">{{code.errors.msg}}</mat-error>
         </mat-form-field>
+        <mat-form-field>
+            <input matInput placeholder="数量" type="text" [formControl]="code">
+            <mat-icon matPrefix color="accent">score</mat-icon>
+            <mat-error *ngIf="code.hasError('invalid')">{{code.errors.msg}}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+            <input matInput placeholder="检票ID" type="text" [formControl]="code">
+            <mat-icon matPrefix color="accent">perm_identity</mat-icon>
+            <mat-error *ngIf="code.hasError('invalid')">{{code.errors.msg}}</mat-error>
+        </mat-form-field>
+        <button mat-stroked-button color="accent" (click)="checkin()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">playlist_add_check</mat-icon><div fxFlex>检票字段设置</div><mat-icon fxFlex="none">arrow_forward_ios</mat-icon></div></button>
+        <button mat-stroked-button color="accent" (click)="checkout()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">notification_important</mat-icon><div fxFlex>结票通知设置</div><mat-icon fxFlex="none">arrow_forward_ios</mat-icon></div></button>
+        <button mat-flat-button color="accent"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">done</mat-icon><div fxFlex>完成</div></div></button>
+        <mat-slide-toggle [formControl]="isModInc">{{isModInc.value? '结票自动恢复数量' : '结票数量清0'}}</mat-slide-toggle>
+        <br><br>
+    </form>
+</sheet>
+<sheet [data]="check">
+    <form [formGroup]="formCheck" style="width:100%" sheet-item>
+        <mat-form-field *ngFor="let ctrl of formCheck.controls | keyvalue; let i=index">
+            <input matInput  type="tel" placeholder="检票字段{{i}}" [formControl]="formCheck.controls[ctrl.key]">
+            <mat-icon matPrefix color="accent">filter_{{i > 9 ? '9_plus' : i }}</mat-icon>
+            <button mat-icon-button matSuffix class="title-icon-suffix" (click)="remove(ctrl.key)"><mat-icon  color="accent">delete_forever</mat-icon></button>
+            <mat-error *ngIf="formCheck.controls[ctrl.key].hasError('invalid')">{{formCheck.controls[ctrl.key].errors.msg}}</mat-error>
+        </mat-form-field >
+        <button mat-stroked-button color="accent" (click)="append()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">add</mat-icon><div fxFlex>增加</div></div></button>
+        <button mat-flat-button color="accent" (click)="rePopup()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">arrow_back_ios</mat-icon><div fxFlex>返回</div></div></button>
+        <br><br>
     </form>
 </sheet>

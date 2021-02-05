@@ -1,4 +1,4 @@
-import { Component, Input, ContentChild, OnChanges, Inject, Injector, ReflectiveInjector, Injectable } from '@angular/core';
+import { Component, Input, ContentChild, OnChanges, Inject, Injector, ReflectiveInjector, Injectable, ElementRef, Renderer2 } from '@angular/core';
 import { DSheet } from './DIR.sheet';
 import { MatBottomSheet, MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
 
@@ -7,14 +7,12 @@ export class DData {
 }
 
 @Component({
-    selector: 'container',
-    template:
-        `<ng-container *ngComponentOutlet="data.component; injector: inj"></ng-container>`,
+    template: '',
 })
 class CContainer {
     inj: Injector;
-    constructor(@Inject(MAT_BOTTOM_SHEET_DATA) public data: {component: any, appendix: DData }, public injector: Injector) {
-        this.inj = ReflectiveInjector.resolveAndCreate([{ provide: DData, useValue: data.appendix }], this.injector);
+    constructor(@Inject(MAT_BOTTOM_SHEET_DATA) public data: {ref: any, appendix: DData }, private hostElement: ElementRef, private renderer:Renderer2) {
+        this.renderer.appendChild(hostElement.nativeElement, data.ref.nativeElement);
     }
 }
 
@@ -37,7 +35,7 @@ export class CSheet implements OnChanges {
         }
     }
     open(data: DData): void {
-        const bottomSheetRef = this.bottomsheet.open(CContainer, {data: {component: this.item._this, appendix: data}});
+        const bottomSheetRef = this.bottomsheet.open(CContainer, {data: {ref: this.item.ref, appendix: data}});
         bottomSheetRef.afterDismissed().subscribe(() => {
             console.log('dataFromChild');
             this.data = null;

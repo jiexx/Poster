@@ -17,7 +17,7 @@ import { SheetModule } from 'app/common/sheet/sheet.module';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatRadioModule } from '@angular/material/radio';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle'
 import { CList } from './component.list/CPNT.list';
 import { CDetail } from './component.detail/CPNT.detail';
 import { CInput } from './component.input/CPNT.input';
@@ -39,7 +39,7 @@ import { CInput } from './component.input/CPNT.input';
         MatToolbarModule,
         MatSelectModule,
         MatDividerModule,
-        MatRadioModule,
+        MatSlideToggleModule,
         DialogModule,
         SheetModule
     ],

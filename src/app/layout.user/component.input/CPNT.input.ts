@@ -22,20 +22,24 @@ export class CInput extends Bus  implements OnInit {
     ngOnInit(): void {
 
     }
-    mobile = new FormControl('', [
+    mobile = new FormControl('xx', [
         codeValidator
     ]);
     code = new FormControl('', [
         codeValidator
     ]);
-    form: FormGroup = new FormGroup({
+    isModInc = new FormControl(true, [
+    ]);
+    formPopup: FormGroup = new FormGroup({
         mobile: this.mobile,
-        code: this.code
+        code: this.code,
+        isModInc: this.isModInc
     });
-    popup = null;
+    
     constructor(private location: Location, protected bus: BusService){
         super(bus);
     }
+    popup = null;
     save(){
         this.popup = {};
     }
@@ -44,6 +48,26 @@ export class CInput extends Bus  implements OnInit {
     }
     edit(){
 
+    }
+    formCheck: FormGroup = new FormGroup({
+    });
+    check = null;
+    checkin(){
+        this.check = {};
+    }
+    checkout(){
+        
+    }
+    append() {
+        this.formCheck.addControl(Math.ceil(Math.random()*10000)+'', new FormControl('', [
+            codeValidator
+        ]))
+    }
+    remove(key){
+        this.formCheck.removeControl(key);
+    }
+    rePopup(){
+        this.popup = {};
     }
     today(){
         return new Date().toLocaleDateString()
