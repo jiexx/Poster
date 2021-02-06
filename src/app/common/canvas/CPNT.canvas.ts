@@ -1,17 +1,17 @@
 import { AfterViewInit } from '@angular/core';
-import { Component, Input, ContentChild, OnChanges, Inject, Injector, ReflectiveInjector, Injectable, ElementRef, Renderer2, HostListener, ViewChild } from '@angular/core';
-import { DSheet } from './DIR.canvas';
+import { Component, OnChanges, ElementRef, HostListener, ViewChild } from '@angular/core';
 
 class Text {
     constructor(public ctx: CanvasRenderingContext2D, public text = "", public options: any = {}) {
         this.options = Object.assign({ width: 250, height: 40, font: "17px Arial", borderWidth: 1, borderColor: "#ccc", padding: 5 }, options);
     }
     position = { x: 10, y: 10 };
-    isFocus = false;
+    isFocus = true;
     focusIndex = this.text.length;
     isCommandKey = false;
     selected = false;
     render() {
+        //this.ctx.translate(0.5, 0.5);
         this.ctx.clearRect(this.position.x, this.position.y, this.options.width, this.options.height);
         this.ctx.font = this.options.font;
         this.ctx.lineWidth = this.options.borderWidth;
@@ -43,12 +43,13 @@ class Text {
 
         this.ctx.fillStyle = "#000";
         this.ctx.fillText(str, this.position.x + this.options.padding, this.position.y + (this.options.height / 2) + this.options.padding);
-
+        //this.ctx.translate(-0.5, -0.5);
     }
 
     handleOnClick(e) {
-        let clientX = e.clientX;
-        let clientY = e.clientY;
+        let clientX = e.offsetX;
+        let clientY = e.offsetY;
+        console.log(clientX, clientY)
         if (clientX <= this.position.x + this.options.width && clientX >= this.position.x && clientY <= this.position.y + this.options.height && clientY >= this.position.y) {
             if (!this.isFocus) {
                 this.isFocus = true;
@@ -65,7 +66,7 @@ class Text {
         }
     }
 
-    handleOnKeyUp(e) {
+    handleOnKeyUp() {
         this.isCommandKey = false;
         this.render();
     }
@@ -130,6 +131,12 @@ class Text {
     selector: 'canvasr',
     template:
         `<canvas #my></canvas>`,
+    styles: [
+        `canvas {
+            width: 100%;
+            height: 100%;
+        }`
+    ]
 })
 export class CCanvas implements OnChanges, AfterViewInit  {
     @ViewChild('my') canvas: ElementRef<HTMLCanvasElement>;
@@ -140,11 +147,31 @@ export class CCanvas implements OnChanges, AfterViewInit  {
     }
     ngOnChanges() {
     }
+    PIXEL_RATIO 
     ngAfterViewInit() {
-        this.context = this.canvas.nativeElement.getContext('2d');
+        let ctx = this.canvas.nativeElement.getContext("2d");
+        let dpr = window.devicePixelRatio || 1;
+        let bsr = ctx['webkitBackingStorePixelRatio'] ||
+        ctx['mozBackingStorePixelRatio'] ||
+        ctx['msBackingStorePixelRatio'] ||
+        ctx['oBackingStorePixelRatio'] ||
+        ctx['backingStorePixelRatio'] || 1;
+
+        this.PIXEL_RATIO = dpr / bsr;
+        
+        this.context = this.createHiDPICanvas(this.canvas.nativeElement.offsetWidth, this.canvas.nativeElement.offsetHeight).getContext("2d");
         this.text = new Text(this.context);
     }
-    private last: MouseEvent;
+    createHiDPICanvas(w, h, ratio = 0) {
+        if (!ratio) { ratio = this.PIXEL_RATIO; }
+        var can = this.canvas.nativeElement;
+        can.width = w * ratio;
+        can.height = h * ratio;
+        can.style.width = w + "px";
+        can.style.height = h + "px";
+        can.getContext("2d").setTransform(ratio, 0, 0, ratio, 0, 0);
+        return can;
+    }
     private mouseDown: boolean = false;
     @HostListener('mouseup')
     onMouseup() {
@@ -153,31 +180,68 @@ export class CCanvas implements OnChanges, AfterViewInit  {
     @HostListener('mousemove', ['$event'])
     onMousemove(event: MouseEvent) {
         if (this.mouseDown) {
-            this.last = event;
         }
     }
     @HostListener('mousedown', ['$event'])
     onMousedown(event) {
         this.mouseDown = true;
-        this.last = event;
     }
     @HostListener('window:keyup', ['$event'])
     onKeyUp(event: KeyboardEvent) {
         // Your row selection code
-        this.text.handleOnKeyUp(event);
+        console.log(event, event.keyCode, event.charCode );
+        this.text.handleOnKeyUp();
     }
     @HostListener('window:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
         // Your row selection code
-        console.log(event, event.keyCode);
+        
         this.text.handleOnKeyDown(event);
     }
-    @HostListener('click', ['$event.target']) 
+    @HostListener('click', ['$event']) 
     onClick(event) {
+        if (event.target) {
+            event.target.focus();
+            event.target.click();
+        }
         this.text.handleOnClick(event);
+        // if (this.hasInput) return;
+        // this.addInput(event.clientX, event.clientY);
+    }
+    @HostListener('compositionupdate', ['$event']) 
+    onCompositionupdate(event) {
+        console.log(event.data);
     }
     
-    open(data: any): void {
+    
+    open(): void {
 
+    }
+    hasInput;
+    addInput(x, y) {
+
+        var input = document.createElement('input');
+    
+        input.type = 'text';
+        input.style.position = 'fixed';
+        input.style.left = (x - 4) + 'px';
+        input.style.top = (y - 4) + 'px';
+    
+        input.onkeydown = (e)=>{
+            this.handleEnter(e, input)
+        };
+    
+        document.body.appendChild(input);
+    
+        input.focus();
+    
+        this.hasInput = true;
+    }
+    handleEnter(e, input) {
+        var keyCode = e.keyCode;
+        if (keyCode === 13) {
+            document.body.removeChild(input);
+            this.hasInput = false;
+        }
     }
 }

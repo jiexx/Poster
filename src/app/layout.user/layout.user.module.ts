@@ -21,6 +21,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle'
 import { CList } from './component.list/CPNT.list';
 import { CDetail } from './component.detail/CPNT.detail';
 import { CInput } from './component.input/CPNT.input';
+import { CanvasModule } from 'app/common/canvas/canvas.module';
 
 @NgModule({
     imports: [
@@ -41,7 +42,8 @@ import { CInput } from './component.input/CPNT.input';
         MatDividerModule,
         MatSlideToggleModule,
         DialogModule,
-        SheetModule
+        SheetModule,
+        CanvasModule
     ],
     declarations: [
         LayoutUser,
