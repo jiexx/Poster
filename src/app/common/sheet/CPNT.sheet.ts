@@ -19,8 +19,8 @@ class CContainer {
 @Component({
     selector: 'sheet',
     template:
-        `<div >
-            <ng-content select="[sheet-item]" ></ng-content>   
+        `<div [style.display]="'none'">
+            <ng-content select="[sheet-item]"></ng-content>   
         </div>`,
 })
 export class CSheet implements OnChanges {

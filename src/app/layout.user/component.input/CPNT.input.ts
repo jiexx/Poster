@@ -20,7 +20,8 @@ export class CInput extends Bus  implements OnInit {
         return 'CInput';
     }
     ngOnInit(): void {
-
+        this.popup = null;
+        this.check = null;
     }
     mobile = new FormControl('xx', [
         codeValidator
