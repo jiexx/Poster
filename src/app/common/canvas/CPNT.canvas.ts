@@ -1,10 +1,10 @@
 import { AfterViewInit } from '@angular/core';
 import { Component, OnChanges, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { ExCanvasRenderingContext2D } from './exCanvas';
+import { ExCanvasRenderingContext2D, Text } from './exCanvas';
 
 
 
-class Text {
+class Texts {
     private textarea: HTMLTextAreaElement = null;
     constructor(public ex: ExCanvasRenderingContext2D, public text = "", public options: any = {}) {
         this.options = Object.assign({ width: 250, height: 40, font: "16px Arial", borderWidth: 1, borderColor: "#ccc", padding: 5 }, options);
@@ -187,31 +187,38 @@ export class CCanvas implements OnChanges, AfterViewInit  {
     ngOnChanges() {
     } 
     ngAfterViewInit() {
+        //this.text = new Text(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
         this.text = new Text(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
+        this.initHiddenTextarea();
     }
     private mouseDown: boolean = false;
     @HostListener('mouseup')
     onMouseup() {
         this.mouseDown = false;
+        this.text.onMouseup();
     }
     @HostListener('mousemove', ['$event'])
     onMousemove(event: MouseEvent) {
         if (this.mouseDown) {
+            this.text.onMousemove(event);
         }
     }
     @HostListener('mousedown', ['$event'])
     onMousedown(event) {
         this.mouseDown = true;
+        this.text.onMousedown(event);
+        this.textarea.focus();
     }
     @HostListener('window:keyup', ['$event'])
     onKeyUp(event: KeyboardEvent) {
         // Your row selection code
-        this.text.handleOnKeyUp();
+        //this.text.handleOnKeyUp();
     }
     @HostListener('window:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
         // Your row selection code
-        this.text.handleOnKeyDown(event);
+        //this.text.handleOnKeyDown(event);
+        this.textarea.focus();
     }
     @HostListener('click', ['$event']) 
     onClick(event) {
@@ -219,11 +226,29 @@ export class CCanvas implements OnChanges, AfterViewInit  {
             event.target.focus();
             event.target.click();
         }
-        this.text.handleOnClick(event);
-        // if (this.hasInput) return;
-        // this.addInput(event.clientX, event.clientY);
+        //this.text.handleOnClick(event);
     }
-    open(): void {
-
+    private textarea: HTMLTextAreaElement = null;
+    initHiddenTextarea() {
+        let textarea = document.createElement('textarea');
+        textarea.autocapitalize = 'off';
+        textarea.autocomplete = 'off';
+        textarea.spellcheck = false;
+        textarea.wrap = 'off';
+        textarea.style.position = 'fixed';
+        textarea.style.left = '0px';
+        textarea.style.top = '0px';
+        textarea.style.zIndex = '-999';
+        textarea.style.opacity = '0';
+        textarea.style.width = '1px';
+        textarea.style.height = '1px';
+        textarea.style.fontSize = '1px';
+        textarea.onkeyup = (e)=>{
+            console.log(textarea.value)
+            this.text.onKeyUp(e, textarea.value);
+            this.textarea.focus();
+        };
+        document.body.appendChild(textarea);
+        this.textarea = textarea;
     }
 }

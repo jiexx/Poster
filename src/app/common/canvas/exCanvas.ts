@@ -115,13 +115,18 @@ interface Renderable {
     render(ex: ExCanvasRenderingContext2D);
 }
 class Rect {
-    update(ex: ExCanvasRenderingContext2D, renderable: Renderable) {
+    move(ex: ExCanvasRenderingContext2D, renderable: Renderable) {
         ex.context.save();
         ex.context.translate(this.x, this.y);
         if(this.angle < -0.00001 || this.angle > 0.00001 ) {
             ex.context.rotate(this.angle);
         }
-        renderable.render(ex);
+        if(renderable) {
+            renderable.render(ex);
+        }
+        this.fixedGroup.forEach(a => {
+            a.render(ex);
+        })
         ex.context.restore();
     }
     constructor(private _x = 0, private _y = 0, private _w = 0, private _h = 0, private _angle = 0) {
@@ -162,9 +167,9 @@ class Rect {
     get h(){
         return this._y;
     }
-    groupTranslated: Rect[] = [];
-    attachGroupTranslated(attachment: Rect){
-        this.groupTranslated.push(attachment);
+    fixedGroup: Renderable[] = [];
+    attach(attachment: Renderable){
+        this.fixedGroup.push(attachment);
     }
 }
 class Circle extends Rect implements Renderable {
@@ -203,7 +208,7 @@ class Movable extends Border {
     isScale = false;
     isRotate = false;
     mouseDown = false;
-    constructor(x = 0, y = 0, w = 0, h = 0, private ex: ExCanvasRenderingContext2D) {
+    constructor(protected ex: ExCanvasRenderingContext2D, x = 0, y = 0, w = 0, h = 0, ) {
         super(x, y, w, h);
         
         this.scalePoint = new Solid(x + w - this.pointRadius, -this.pointRadius, this.pointRadius*2, this.pointRadius*2);
@@ -221,37 +226,29 @@ class Movable extends Border {
     onMousemove(event: MouseEvent) {
         if(this.isFocus && !this.isScale && !this.isRotate){
             this.translate(event.x, event.y);
-            this.scalePoint.translate(event.x, event.y);
-            this.rotatePoint.translate(event.x, event.y);
         }else if(this.isScale) {
             this.scale(event.x, event.y);
             this.scalePoint.translate(event.x, event.y);
             this.rotatePoint.translate(event.x, this.scalePoint.y);
         }else if(this.isRotate) {
             this.rotate(event.x, event.y);
-            this.scalePoint.translate(event.x, event.y);
-            this.rotatePoint.translate(event.x, event.y, this.angle);
         }
-        this.render(this.ex);
-        this.scalePoint.render(this.ex);
-        this.rotatePoint.render(this.ex);
+        this.move(this.ex, this);
     }
-    onMouseup(event: MouseEvent) {
+    onMouseup() {
         this.isFocus = false;
         this.isScale = false;
         this.isRotate = false;
     }
 } 
 
-class Text extends Movable {
+export class Text extends Movable {
     font = '16px Arial';
     color = '#000';
     padding = 5;
-    border = null;
-    constructor(public str = '') {
-        super();
-        this.border = new Border();
-        this.attach(this.border);
+    focusIndex = 0;
+    constructor(ex: ExCanvasRenderingContext2D, public str = '') {
+        super(ex, 0, 0, 64, 32);
     }
     measureText(ex: ExCanvasRenderingContext2D, str: string) {
         let metrics = ex.context.measureText(str);
@@ -260,11 +257,12 @@ class Text extends Movable {
         return {width: w, height: h};
     }
     renderWrappingText(ex: ExCanvasRenderingContext2D, str: string){
-        let start = 0, end = 1, H = 0, x = 0, y = 0;
+        let start = 0, end = 1, W = 0, H = 0, x = 0, y = 0;
         let offset = this.measureText(ex, ' ').height;
         for(let i = 0; i < str.length; i ++) {
             let {width, height} = this.measureText(ex, str.substring(start, end));
             if(x + width >= this.w ||str[i] == '\n') {
+                W = x + width > W ? x + width : W;
                 x = 0;
                 y += height || offset;
                 start = i;
@@ -276,12 +274,41 @@ class Text extends Movable {
             H = height;
             ex.fillText(str[i], this.x + this.padding + x, this.y + this.padding + y);
         }
-        return y + H;
+        this.scale(W + (this.padding*2), y + H +(this.padding*2));
     }
     render(ex: ExCanvasRenderingContext2D) {
         ex.context.font = this.font;
         ex.context.fillStyle = this.color;
-        this.border.y = this.renderWrappingText(ex, this.str)
-        this.border.render(ex);
+        this.renderWrappingText(ex, this.str)
+    }
+    onMousedown(e: MouseEvent) {
+        super.onMousedown(e);
+        if (this.isFocus) {
+            
+        }
+    }
+    onKeyUp(e: KeyboardEvent, str: string) {
+        if (this.isFocus) {
+            e.preventDefault();
+        }
+        if (this.isFocus && e.key === "Backspace") {
+            let txt = "";
+            for (let i = 0; i < str.length; i++) {
+                if (i !== this.focusIndex - 1) {
+                    txt += str[i];
+                }
+            }
+            str = txt;
+
+            this.focusIndex--;
+            if (this.focusIndex < 0) {
+                this.focusIndex = 0;
+            }
+            
+        }
+        if(this.str != str) {
+            this.str = str;
+            this.render(this.ex);
+        }
     }
 }
