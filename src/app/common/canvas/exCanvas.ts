@@ -1,3 +1,6 @@
+import { THIS_EXPR } from "@angular/compiler/src/output/output_ast";
+import { sample, timestamp } from "rxjs/operators";
+
 export class ExCanvasRenderingContext2D {
     PIXEL_RATIO = 1.0;
     pixelRatio() {
@@ -108,20 +111,177 @@ export class ExCanvasRenderingContext2D {
         this.context.arc(x * this.PIXEL_RATIO, y * this.PIXEL_RATIO, radius * this.PIXEL_RATIO, startAngle, endAngle, anticlockwise)
     }
 }
+interface Renderable {
+    render(ex: ExCanvasRenderingContext2D);
+}
+class Rect {
+    update(ex: ExCanvasRenderingContext2D, renderable: Renderable) {
+        ex.context.save();
+        ex.context.translate(this.x, this.y);
+        if(this.angle < -0.00001 || this.angle > 0.00001 ) {
+            ex.context.rotate(this.angle);
+        }
+        renderable.render(ex);
+        ex.context.restore();
+    }
+    constructor(private _x = 0, private _y = 0, private _w = 0, private _h = 0, private _angle = 0) {
+    }
+    translate(x, y){
+        this._x = x;
+        this._y = y;
+    }
+    scale(x, y){
+        this._w = x - this._x;
+        this._h = y - this._y;
+    }
+    rotate(x, y, angle = 0){
+        if(!angle){
+            let offsetX = x - this.x;
+            let offsetY = y - this.y;
+            this._angle = Math.atan(offsetY/offsetX);
+        }else {
+            this._angle = angle;
+        }
+        
+    }
+    detect(x: number, y: number){
+        return x - this.x < this.w && y - this.y < this.h;
+    }
+    get angle() {
+        return this._angle;
+    }
+    get x(){
+        return this._x;
+    }
+    get y(){
+        return this._y;
+    }
+    get w(){
+        return this._w;
+    }
+    get h(){
+        return this._y;
+    }
+    groupTranslated: Rect[] = [];
+    attachGroupTranslated(attachment: Rect){
+        this.groupTranslated.push(attachment);
+    }
+}
+class Circle extends Rect implements Renderable {
+    color = '#87ceeb';
+    render(ex: ExCanvasRenderingContext2D) {
+        ex.arc(this.w/2.0, this.h/2.0, Math.min(this.w, this.h)/2.0, 0, 2 * Math.PI, false);
+        ex.context.fillStyle = this.color;
+        ex.context.fill();
+        ex.context.lineWidth = 1;
+        ex.context.strokeStyle = this.color;
+        ex.stroke();
+    }
+}
+class Solid extends Rect implements Renderable {
+    color = '#87ceeb';
+    render(ex: ExCanvasRenderingContext2D) {
+        ex.context.fillStyle = this.color;
+        ex.fillRect(0, 0, this.w, this.h);
+    }
+}
+class Border extends Rect implements Renderable {
+    width = 1;
+    color = '#87ceeb';
+    render(ex: ExCanvasRenderingContext2D){
+        ex.context.lineWidth = this.width;
+        ex.context.strokeStyle = this.color;
+        ex.rect(0, 0, this.w, this.h);
+        ex.stroke();
+    }
+}
+class Movable extends Border {
+    pointRadius = 3;
+    scalePoint: Solid = null;
+    rotatePoint: Circle = null;
+    isFocus = false;
+    isScale = false;
+    isRotate = false;
+    mouseDown = false;
+    constructor(x = 0, y = 0, w = 0, h = 0, private ex: ExCanvasRenderingContext2D) {
+        super(x, y, w, h);
+        
+        this.scalePoint = new Solid(x + w - this.pointRadius, -this.pointRadius, this.pointRadius*2, this.pointRadius*2);
+        this.attach(this.scalePoint);
 
-class Text {
+        this.rotatePoint = new Circle(x + w - this.pointRadius, y + h - this.pointRadius, this.pointRadius*2, this.pointRadius*2);
+        this.attach(this.scalePoint);
+    }
+    
+    onMousedown(event: MouseEvent) {
+        this.isFocus = this.detect(event.x, event.y);
+        this.isScale = this.scalePoint.detect(event.x, event.y);
+        this.isRotate = this.rotatePoint.detect(event.x, event.y);
+    }
+    onMousemove(event: MouseEvent) {
+        if(this.isFocus && !this.isScale && !this.isRotate){
+            this.translate(event.x, event.y);
+            this.scalePoint.translate(event.x, event.y);
+            this.rotatePoint.translate(event.x, event.y);
+        }else if(this.isScale) {
+            this.scale(event.x, event.y);
+            this.scalePoint.translate(event.x, event.y);
+            this.rotatePoint.translate(event.x, this.scalePoint.y);
+        }else if(this.isRotate) {
+            this.rotate(event.x, event.y);
+            this.scalePoint.translate(event.x, event.y);
+            this.rotatePoint.translate(event.x, event.y, this.angle);
+        }
+        this.render(this.ex);
+        this.scalePoint.render(this.ex);
+        this.rotatePoint.render(this.ex);
+    }
+    onMouseup(event: MouseEvent) {
+        this.isFocus = false;
+        this.isScale = false;
+        this.isRotate = false;
+    }
+} 
+
+class Text extends Movable {
     font = '16px Arial';
+    color = '#000';
     padding = 5;
-    borderWidth = 1;
-    borderColor = '#ccc';
-    borderActiveColor = '#87ceeb'
+    border = null;
     constructor(public str = '') {
-
+        super();
+        this.border = new Border();
+        this.attach(this.border);
     }
-    isSelected(x, y){
-
+    measureText(ex: ExCanvasRenderingContext2D, str: string) {
+        let metrics = ex.context.measureText(str);
+        let h = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+        let w = metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight;
+        return {width: w, height: h};
     }
-    render(){
-
+    renderWrappingText(ex: ExCanvasRenderingContext2D, str: string){
+        let start = 0, end = 1, H = 0, x = 0, y = 0;
+        let offset = this.measureText(ex, ' ').height;
+        for(let i = 0; i < str.length; i ++) {
+            let {width, height} = this.measureText(ex, str.substring(start, end));
+            if(x + width >= this.w ||str[i] == '\n') {
+                x = 0;
+                y += height || offset;
+                start = i;
+                end = i + 1;
+            }else{
+                x += width;
+                end = i + 1;
+            }
+            H = height;
+            ex.fillText(str[i], this.x + this.padding + x, this.y + this.padding + y);
+        }
+        return y + H;
+    }
+    render(ex: ExCanvasRenderingContext2D) {
+        ex.context.font = this.font;
+        ex.context.fillStyle = this.color;
+        this.border.y = this.renderWrappingText(ex, this.str)
+        this.border.render(ex);
     }
 }
