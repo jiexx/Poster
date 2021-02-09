@@ -1,6 +1,6 @@
 import { AfterViewInit } from '@angular/core';
 import { Component, OnChanges, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { ExCanvasRenderingContext2D, Text } from './exCanvas';
+import { ExCanvasRenderingContext2D, RenderManger, Text } from './exCanvas';
 
 
 
@@ -179,8 +179,7 @@ class Texts {
 })
 export class CCanvas implements OnChanges, AfterViewInit  {
     @ViewChild('container') container: ElementRef<HTMLElement>;
-    public context: CanvasRenderingContext2D;
-    public text: Text;
+    public mgr: RenderManger;
     constructor() {
 
     }
@@ -188,25 +187,27 @@ export class CCanvas implements OnChanges, AfterViewInit  {
     } 
     ngAfterViewInit() {
         //this.text = new Text(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
-        this.text = new Text(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
+        this.mgr = new RenderManger(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
+        this.mgr.translate(50,100)
         this.initHiddenTextarea();
     }
     private mouseDown: boolean = false;
     @HostListener('mouseup')
     onMouseup() {
         this.mouseDown = false;
-        this.text.onMouseup();
+        this.mgr.onMouseup();
     }
     @HostListener('mousemove', ['$event'])
     onMousemove(event: MouseEvent) {
         if (this.mouseDown) {
-            this.text.onMousemove(event);
+            this.mgr.onMousemove(event);
         }
     }
     @HostListener('mousedown', ['$event'])
     onMousedown(event) {
         this.mouseDown = true;
-        this.text.onMousedown(event);
+        this.mgr.createText();
+        this.mgr.onMousedown(event);
         this.textarea.focus();
     }
     @HostListener('window:keyup', ['$event'])
@@ -245,7 +246,7 @@ export class CCanvas implements OnChanges, AfterViewInit  {
         textarea.style.fontSize = '1px';
         textarea.onkeyup = (e)=>{
             console.log(textarea.value)
-            this.text.onKeyUp(e, textarea.value);
+            this.mgr.onKeyUp(e, textarea.value);
             this.textarea.focus();
         };
         document.body.appendChild(textarea);
