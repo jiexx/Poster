@@ -205,6 +205,7 @@ class Group extends Rect implements Renderable {
     scalePoint: Solid = null;
     rotatePoint: Circle = null;
     border: Border = null;
+    padding = 5;
     isFocus = false;
     isScale = false;
     isRotate = false;
@@ -217,10 +218,11 @@ class Group extends Rect implements Renderable {
         this.attach(this.scalePoint);
 
         this.rotatePoint = new Circle(0, 0, this.pointRadius*2, this.pointRadius*2);
-        this.scalePoint.translate(x + w - this.pointRadius, y + h - this.pointRadius);
+        this.rotatePoint.translate(x + w - this.pointRadius, y + h - this.pointRadius);
         this.attach(this.scalePoint);
 
         this.border = new Border(0, 0, w, h);
+        this.border.translate(- this.padding, - this.padding);
         this.attach(this.border);
     }
     render(ex: ExCanvasRenderingContext2D) {
@@ -251,7 +253,6 @@ class Group extends Rect implements Renderable {
 export class Text extends Group {
     font = '16px Arial';
     color = '#000';
-    padding = 5;
     focusIndex = 0;
     constructor(ex: ExCanvasRenderingContext2D, public str = '') {
         super(ex, 0, 0, 64, 32);
@@ -264,14 +265,14 @@ export class Text extends Group {
     }
     renderWrappingText(ex: ExCanvasRenderingContext2D, str: string){
         console.log('wrap', str);
-        let W = 0, H = 0, x = this.padding, y = this.padding;
-        let offset = this.measureText(ex, ' ').height;
+        let W = 0, H = 0, x = 0, y = 0;
+        let offset = this.measureText(ex, '|').height;
         for(let i = 0; i < str.length; i ++) {
             ex.fillText(str[i], x, y);
             console.log(x, y, str[i]);
             let {width, height} = this.measureText(ex, str[i]);
             if(x + width >= this.w || str[i] == '\n') {
-                x = this.padding;
+                x = 0;
                 y += height || offset;
             }else{
                 x += width;
@@ -279,7 +280,8 @@ export class Text extends Group {
             W = x > W ? x : W;
             H = y + height;
         }
-        this.border.scale(W + (this.padding*2), H +(this.padding*2));
+        this.border.scale(W + this.padding, H + this.padding);
+        console.log('border', this.border.x, this.border.y, this.border.w, this.border.h);
     }
     render(ex: ExCanvasRenderingContext2D) {
         super.render(ex);
