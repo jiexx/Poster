@@ -197,8 +197,9 @@ export class CCanvas implements OnChanges, AfterViewInit  {
         this.mouseDown = false;
         this.mgr.onMouseup();
     }
-    @HostListener('mousemove', ['$event'])
+    @HostListener('document:mousemove', ['$event'])
     onMousemove(event: MouseEvent) {
+        console.log('onMousemove', this.mouseDown)
         if (this.mouseDown) {
             this.mgr.onMousemove(event);
         }
@@ -209,6 +210,7 @@ export class CCanvas implements OnChanges, AfterViewInit  {
         this.mgr.createText();
         this.mgr.onMousedown(event);
         this.textarea.focus();
+        return false;
     }
     @HostListener('window:keyup', ['$event'])
     onKeyUp(event: KeyboardEvent) {
