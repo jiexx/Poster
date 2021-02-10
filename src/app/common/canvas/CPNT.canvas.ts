@@ -174,6 +174,7 @@ class Texts {
         `div {
             width: 100%;
             height: 100%;
+            max-height: 100%;
         }`
     ]
 })
@@ -188,29 +189,30 @@ export class CCanvas implements OnChanges, AfterViewInit  {
     ngAfterViewInit() {
         //this.text = new Text(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
         this.mgr = new RenderManger(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
-        this.mgr.translate(50,100)
+        this.mgr.translate(50,100);
         this.initHiddenTextarea();
     }
     private mouseDown: boolean = false;
+    @HostListener('touchend')
     @HostListener('mouseup')
     onMouseup() {
         this.mouseDown = false;
         this.mgr.onMouseup();
     }
-    @HostListener('document:mousemove', ['$event'])
-    onMousemove(event: MouseEvent) {
-        console.log('onMousemove', this.mouseDown)
+    @HostListener('touchmove', ['$event'])
+    onMousemove(event) {
         if (this.mouseDown) {
             this.mgr.onMousemove(event);
         }
     }
+    @HostListener('touchstart', ['$event'])
     @HostListener('mousedown', ['$event'])
     onMousedown(event) {
         this.mouseDown = true;
         this.mgr.createText();
         this.mgr.onMousedown(event);
         this.textarea.focus();
-        return false;
+        console.log('mousedown', this.mouseDown)
     }
     @HostListener('window:keyup', ['$event'])
     onKeyUp(event: KeyboardEvent) {

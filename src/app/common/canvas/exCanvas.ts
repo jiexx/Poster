@@ -23,6 +23,7 @@ export class ExCanvasRenderingContext2D {
             this.pixelRatio();
         }
         let w = this.container.clientWidth, h = this.container.clientHeight;
+        container.style.height = h + 'px'; 
         this.canvas.width = w * this.PIXEL_RATIO;
         this.canvas.height = h * this.PIXEL_RATIO;
         this.canvas.style.width = w + 'px';
@@ -123,11 +124,13 @@ class Rect {
             this['render'](ex);
         }
         this.children.forEach(a => {
-            a.render(ex);
+            if(a['render']) {
+                a['render'](ex);
+            }
         })
         ex.context.restore();
     }
-    constructor(private _x = 0, private _y = 0, private _w = 0, private _h = 0, private _angle = 0) {
+    constructor(private _x = 0, private _y = 0, private _w = 0, private _h = 0, private _angle = 0, private parent: Rect = null) {
     }
     translate(x, y){
         this._x = x;
@@ -148,16 +151,25 @@ class Rect {
         
     }
     detect(x: number, y: number){
-        return x - this.x < this.w && y - this.y < this.h;
+        return x > this.x && y > this.y && x < this.x + this.w && y < this.y + this.h;
+    }
+    relate(prop:string = '_x') {
+        let a = 0;
+        let parent = this.parent;
+        while(parent) {
+            a += parent[prop];
+            parent = parent.parent;
+        }
+        return a;
     }
     get angle() {
         return this._angle;
     }
     get x(){
-        return this._x;
+        return this._x + this.relate('_x');
     }
     get y(){
-        return this._y;
+        return this._y + this.relate('_y');
     }
     get w(){
         return this._w;
@@ -165,9 +177,10 @@ class Rect {
     get h(){
         return this._h;
     }
-    children: Renderable[] = [];
-    attach(child: Renderable){
+    children: Rect[] = [];
+    attach(child: Rect){
         this.children.push(child);
+        this.children.forEach(c => c.parent = this);
     }
 }
 class Circle extends Rect implements Renderable {
@@ -205,11 +218,13 @@ class Group extends Rect implements Renderable {
     pointRadius = 3;
     scalePoint: Solid = null;
     rotatePoint: Circle = null;
+    startPoint = {x: -1, y: -1};
     border: Border = null;
     padding = 5;
     isFocus = false;
     isScale = false;
     isRotate = false;
+    
     mouseDown = false;
     constructor(protected ex: ExCanvasRenderingContext2D, x = 0, y = 0, w = 0, h = 0, ) {
         super(x, y, w, h);
@@ -224,7 +239,7 @@ class Group extends Rect implements Renderable {
 
         this.border = new Border(0, 0, w, h);
         this.border.translate(- this.padding, - this.padding);
-        this.border.scale(x + w, y + h);
+        this.border.scale(w, h);
         this.attach(this.border);
     }
     render(ex: ExCanvasRenderingContext2D) {
@@ -233,11 +248,18 @@ class Group extends Rect implements Renderable {
         this.isFocus = this.detect(x, y);
         this.isScale = this.scalePoint.detect(x, y);
         this.isRotate = this.rotatePoint.detect(x, y);
+        if(this.isFocus) {
+            this.startPoint.x = x; 
+            this.startPoint.y = y;
+        }
+        console.log('onMousedown isFocus', this.isFocus, x, y, this.x, this.y, this.w, this.h);
     }
     onMousemove(x: number, y: number) {
-        console.log('isFocus', this.isFocus, 'isScale', this.isScale, 'isRotate', this.isRotate, x, y)
+        console.log('isFocus', x, y, this.x, this.y, this.w, this.h)
         if(this.isFocus && !this.isScale && !this.isRotate){
-            this.translate(x, y);
+            this.translate(this.x + x - this.startPoint.x, this.y + y - this.startPoint.y);
+            this.startPoint.x = x; 
+            this.startPoint.y = y;
         }else if(this.isScale) {
             this.scale(x, y);
             this.border.scale(x, y)
@@ -283,11 +305,11 @@ export class Text extends Group {
             W = x > W ? x : W;
             H = y;
         }
-        this.border.translate(- this.padding, - offset.height - this.padding);
+        this.scale(W + offset.height + this.padding , H + this.padding);
+        //this.border.translate(- this.padding, - offset.height - this.padding);
         this.border.scale(W + offset.height + this.padding , H + this.padding);
         this.scalePoint.translate(W + offset.height + this.padding - this.pointRadius, H + this.padding - this.pointRadius );
         this.rotatePoint.translate(W + offset.height + this.padding - this.pointRadius, - offset.height - this.padding);
-        console.log('border', W, H);
     }
     render(ex: ExCanvasRenderingContext2D) {
         super.render(ex);
@@ -303,7 +325,7 @@ export class Text extends Group {
     }
     onKeyUp(e: KeyboardEvent, str: string) {
         if (this.isFocus) {
-            e.preventDefault();
+            //e.preventDefault();
         }
         if (this.isFocus && e.key === "Backspace") {
             let txt = "";
@@ -338,20 +360,25 @@ export class RenderManger extends Rect {
     createText(){
         if(this.debug == 1) {
             let text = new Text(this.ex);
-            text.translate(this.x, this.y);
+            text.translate(0, 0);
             this.attach(text);
             this.debug = 2;
         }
     }
-    onMousedown(event: MouseEvent) {
+    onMousedown(event) {
         this.children.forEach((child: Text) => {
-            child.onMousedown(event.x - this.x, event.y - this.y);
+            console.log('onMousedown', event, this.x, this.y);
+            child.onMousedown(
+                (event.x || event.changedTouches[0].clientX) - event.target.getBoundingClientRect().left - this.x, 
+                (event.y || event.changedTouches[0].clientY) - event.target.getBoundingClientRect().top - this.y);
         })
         this.render();
     }
-    onMousemove(event: MouseEvent) {
+    onMousemove(event) {
         this.children.forEach((child: Text) => {
-            child.onMousemove(event.x - this.x, event.y - this.y);
+            child.onMousemove(
+                (event.x || event.changedTouches[0].clientX) - event.target.getBoundingClientRect().left - this.x, 
+                (event.y || event.changedTouches[0].clientY) - event.target.getBoundingClientRect().top - this.y);
         })
         this.render();
     }
