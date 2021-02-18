@@ -1,5 +1,6 @@
 import { THIS_EXPR } from "@angular/compiler/src/output/output_ast";
 import { sample, timestamp } from "rxjs/operators";
+import { Rect2d } from "../projection";
 
 export class ExCanvasRenderingContext2D {
     PIXEL_RATIO = 1.0;
@@ -113,73 +114,32 @@ export class ExCanvasRenderingContext2D {
 interface Renderable {
     render(ex: ExCanvasRenderingContext2D);
 }
-class Rect {
+abstract class Rect extends Rect2d implements Renderable{
+    children: Rect[] = [];
+    constructor(_x = 0, _y = 0, _w = 0, _h = 0, _angle = 0, protected parent: Rect = null) {
+        super(_x, _y, _w, _h);
+    }
+    abstract render(ex: ExCanvasRenderingContext2D);
     update(ex: ExCanvasRenderingContext2D) {
         ex.context.save();
-        ex.context.translate(this.x, this.y);
+        ex.context.translate(this.offset.x, this.offset.y);
         if(this.angle < -0.00001 || this.angle > 0.00001 ) {
             ex.context.rotate(this.angle);
         }
-        if(this['render']) {
-            this['render'](ex);
-        }
+        this.render(ex);
         this.children.forEach(child => {
             child.update(ex);
         })
         ex.context.restore();
     }
-    constructor(private _x = 0, private _y = 0, private _w = 0, private _h = 0, private _angle = 0, protected parent: Rect = null) {
+    absoluteUpdate(){
+        this.children.forEach(child => {
+            child.x = this.absolute('x') + child.offset.x;
+            child.y = this.absolute('y') + child.offset.y;
+            child.absoluteUpdate();
+        })
     }
-    translate(x, y){
-        this._x = x;
-        this._y = y;
-    }
-    scale(x, y){
-        this._w = x;
-        this._h = y;
-    }
-    rotate(x, y, angle = 0){
-        if(!angle){
-            let offsetX = x - this.x;
-            let offsetY = y - this.y;
-            this._angle = Math.atan(offsetY/offsetX);
-            console.log('rotate', x, y, this.x, this.y, offsetX, offsetY, this.angle)
-        }else {
-            this._angle = angle;
-        }
-        
-    }
-    transform(x: number, y: number){
-        let angle = this.absolute('_angle');
-        let x1 = x - this.absolute('_x');
-        let y1 = y - this.absolute('_y');
-        if(angle > -0.00001 && angle < 0.00001){
-            return {x2: x1, y2: y1};
-        }
-        let cos = Math.cos(this.angle);
-        let sin = Math.sin(this.angle);
-        let x2 = x1 * cos - y1 * sin;
-        let y2 = x1 * sin + y1 * cos;
-        return {x2: x2, y2: y2};
-    }
-    hit(x1: number, y1: number){
-        let cos = Math.cos(this.angle);
-        let sin = Math.sin(this.angle);
-        let x2 = x1 * cos - y1 * sin;
-        let y2 = x1 * sin + y1 * cos;
-        return x2 > 0 && y2 > 0 && x2 < this.w && y2 < this.h;
-    }
-    detect(x: number, y: number){
-        /* let X = this.absolute('_x');
-        let Y = this.absolute('_y');
-        let angle = this.absolute('_angle');
-        if(angle < -0.00001 || angle > 0.00001){
-            return this.hit(x - X, y - Y);
-        } 
-        return x > X && y > Y && x < X + this.w && y < Y + this.h;*/
-        return x > this.x && y > this.y && x < this.x + this.w && y < this.y + this.h;
-    }
-    absolute(prop:string = '_x') {
+    absolute(prop:string = 'x') {
         let a = this[prop];
         let parent = this.parent;
         while(parent) {
@@ -188,22 +148,6 @@ class Rect {
         }
         return a;
     }
-    get angle() {
-        return this._angle;
-    }
-    get x(){
-        return this._x
-    }
-    get y(){
-        return this._y
-    }
-    get w(){
-        return this._w;
-    }
-    get h(){
-        return this._h;
-    }
-    children: Rect[] = [];
     attach(child: Rect){
         this.children.push(child);
         this.children.forEach(c => c.parent = this);
@@ -265,42 +209,42 @@ class Group extends Rect implements Renderable {
         this.border = new Border();
         this.attach(this.border);
 
-        this.onChange(x, y, w, h); 
+        this.reset(x, y, w, h); 
     }
-    onChange(x, y, w, h){
-        this.scale(w, h);
-        this.border.scale(this.w + (this.padding*2),  this.h + (this.padding*2));
-        this.rotatePoint.scale(this.pointRadius*2,  this.pointRadius*2);
-        this.scalePoint.scale(this.pointRadius*2, this.pointRadius*2);
-
-        this.border.translate(- this.padding, - this.padding);
-        this.rotatePoint.translate(this.w + this.padding - this.pointRadius, - this.pointRadius);
-        this.scalePoint.translate(this.w + this.padding - this.pointRadius, this.h + this.padding - this.pointRadius);
+    reset(x, y, w, h){
+        this.reset(this.x, this.y, w, h);
+        this.border.reset(- this.padding, - this.padding, this.w + (this.padding*2),  this.h + (this.padding*2));
+        this.rotatePoint.reset(this.w + this.padding - this.pointRadius, - this.pointRadius, this.pointRadius*2,  this.pointRadius*2);
+        this.scalePoint.reset(this.w + this.padding - this.pointRadius, this.h + this.padding - this.pointRadius, this.pointRadius*2, this.pointRadius*2);
+    }
+    getAngle(offsetX, offsetY){
+        return Math.atan(offsetY/offsetX);
     }
     render(ex: ExCanvasRenderingContext2D) {
     }
     onMousedown(x: number, y: number) {
-        let {x2, y2} = this.transform(x, y)
-        this.isFocus = this.detect(x2, y2);
-        this.isScale = this.scalePoint.detect(x2, y2);
-        this.isRotate = this.rotatePoint.detect(x2, y2);
-        if(!this.startPoint) {
-            this.startPoint = {x : super.absolute('_x'), y : super.absolute('_y')}
-        }
+        this.isFocus = this.includes(x, y);
+        this.isScale = this.scalePoint.includes(x, y);
+        this.isRotate = this.rotatePoint.includes(x, y);
+        /* if(!this.startPoint) {
+            this.startPoint = {x : super.absolute('x'), y : super.absolute('y')}
+        } */
         if(this.isFocus){
-            this.endPoint.x = x - super.absolute('_x');
-            this.endPoint.y = y - super.absolute('_y');
+            /* this.endPoint.x = x - super.absolute('x');
+            this.endPoint.y = y - super.absolute('y'); */
+            this.startPoint.x = x;
+            this.startPoint.y = y;
         }
         console.log('onMousedown isRotate', this.isRotate);
     }
     onMousemove(x: number, y: number) {
         if(this.isFocus && !this.isScale && !this.isRotate){
-            super.translate(x - this.startPoint.x - this.endPoint.x, y - this.startPoint.y - this.endPoint.y);       
+            //super.translate(x - this.startPoint.x - this.endPoint.x, y - this.startPoint.y - this.endPoint.y);       
+            this.translateTo(x - this.startPoint.x, y - this.startPoint.y);
         }else if(this.isScale) {
-            this.onChange(x, y, x - this.startPoint.x, y - this.startPoint.y)
+            this.reset(x, y, x - this.startPoint.x, y - this.startPoint.y)
         }else if(this.isRotate) {
-            super.rotate(x - this.startPoint.x, y - this.startPoint.y);
-
+            this.rotate(this.getAngle(x - this.startPoint.x, y - this.startPoint.y));
         }
         console.log('onMousemove isRotate', this.isRotate, x, y, this.startPoint, x - this.startPoint.x, y - this.startPoint.y, this.absolute('_x'), this.absolute('_y'), super.angle);
     }
@@ -342,7 +286,7 @@ export class Text extends Group {
             W = x > W ? x : W;
             H = y;
         }
-        this.onChange(- this.padding, - offset.height - this.padding, Math.max(this.w, W + offset.height + this.padding) , Math.max(this.h, H + offset.height + this.padding) );
+        this.reset(- this.padding, - offset.height - this.padding, Math.max(this.w, W + offset.height + this.padding) , Math.max(this.h, H + offset.height + this.padding) );
     }
     render(ex: ExCanvasRenderingContext2D) {
         super.render(ex);
@@ -352,9 +296,6 @@ export class Text extends Group {
     }
     onMousedown(x: number, y: number) {
         super.onMousedown(x, y);
-        if (this.isFocus) {
-            
-        }
     }
     onKeyUp(e: KeyboardEvent, str: string) {
         if (this.isFocus) {
@@ -393,9 +334,7 @@ export class RenderManger extends Rect {
         this.children.forEach((child: Text) => {
             child.update(this.ex);
         })
-        
         this.ex.context.restore();
-        
     }
     debug = 1;
     createText(){
