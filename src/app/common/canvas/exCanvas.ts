@@ -1,6 +1,6 @@
 import { THIS_EXPR } from "@angular/compiler/src/output/output_ast";
 import { sample, timestamp } from "rxjs/operators";
-import { Rect2d } from "../projection";
+import { BoundingBox, Rect2d, Vector2d } from "../projection";
 
 export class ExCanvasRenderingContext2D {
     PIXEL_RATIO = 1.0;
@@ -111,51 +111,114 @@ export class ExCanvasRenderingContext2D {
         this.context.arc(x * this.PIXEL_RATIO, y * this.PIXEL_RATIO, radius * this.PIXEL_RATIO, startAngle, endAngle, anticlockwise)
     }
 }
-interface Renderable {
-    render(ex: ExCanvasRenderingContext2D);
-}
-abstract class Rect extends Rect2d implements Renderable{
-    children: Rect[] = [];
-    constructor(_x = 0, _y = 0, _w = 0, _h = 0, _angle = 0, protected parent: Rect = null) {
-        super(_x, _y, _w, _h);
+class Renderable extends Rect2d {
+    children: Renderable[] = [];
+    boundingbox = new BoundingBox();
+    constructor(_x = 0, _y = 0, _w = 0, _h = 0, _angle = 0) {
+        super(_w, _h);
+        this.position.x = _x;
+        this.position.y = _y;
+        this.angle = _angle;
     }
-    abstract render(ex: ExCanvasRenderingContext2D);
-    update(ex: ExCanvasRenderingContext2D) {
+    before(ex: ExCanvasRenderingContext2D) {
         ex.context.save();
-        ex.context.translate(this.offset.x, this.offset.y);
+        ex.context.translate(this.position.x, this.position.y);
         if(this.angle < -0.00001 || this.angle > 0.00001 ) {
             ex.context.rotate(this.angle);
         }
-        this.render(ex);
-        this.children.forEach(child => {
-            child.update(ex);
-        })
+    }
+    render(ex: ExCanvasRenderingContext2D) {
+        this.before(ex);
+        this.draw(ex);
+        this.after(ex);
+    }
+    after(ex: ExCanvasRenderingContext2D) {
         ex.context.restore();
     }
-    absoluteUpdate(){
+    draw(ex: ExCanvasRenderingContext2D) {
         this.children.forEach(child => {
-            child.x = this.absolute('x') + child.offset.x;
-            child.y = this.absolute('y') + child.offset.y;
-            child.absoluteUpdate();
+            child.render(ex);
         })
     }
-    absolute(prop:string = 'x') {
-        let a = this[prop];
-        let parent = this.parent;
-        while(parent) {
-            a += parent[prop];
-            parent = parent.parent;
-        }
-        return a;
+    updateBoundingbox() {
+        this.children.forEach(child => {
+            child.boundingbox.update(this as any);
+            child.updateBoundingbox();
+        })
     }
-    attach(child: Rect){
+    includes(point: Vector2d) {
+        point.transfrom(this.boundingbox);
+        return super.includes(point)
+    }
+    attach(child: Renderable) {
         this.children.push(child);
-        this.children.forEach(c => c.parent = this);
     }
 }
-class Circle extends Rect implements Renderable {
-    color = '#87ceeb';
+class Dispatcher {
+    dispatch(command:string, data: any) {
+        this['children'].forEach(child => {
+            let result = true;
+            if(child[command]) {
+                result = child[command].call(child, data)
+            }
+            if(result && child['dispatch']) {
+                child['dispatch'](command, data);
+            }
+        });
+    }
+}
+interface TouchHandler extends Dispatcher{
+    down(x: number, y: number);
+    move(x: number, y: number);
+    up();
+}
+interface KeyHandler extends Dispatcher{
+    key(str: string);
+}
+
+class Touch extends Dispatcher{
+    start = new Vector2d();
+    offset = new Vector2d();
+    X(event) {
+        return (event.x || event.changedTouches[0].clientX) - event.target.getBoundingClientRect().left
+    }
+    Y(event) {
+        return (event.y || event.changedTouches[0].clientY) - event.target.getBoundingClientRect().top;
+    }
+    A(offsetX, offsetY){
+        return Math.atan(offsetY/offsetX);
+    }
+    onDown(event) {
+        this.start.x = this.X(event);
+        this.start.y = this.Y(event);
+        this.dispatch('down', this.start);
+    }
+    onMove(event) {
+        this.offset.x = this.X(event) - this.start.x;
+        this.offset.y = this.Y(event) - this.start.y;
+        this.dispatch('move', this.offset);
+    }
+    onUp() {
+        this.dispatch('up', 0);
+    }
+    onKey(event: KeyboardEvent) {
+        this.dispatch('key', event.key);
+    }
+}
+class RenderMgr extends Renderable{
+    touch = new Touch();
+    constructor(private ex: ExCanvasRenderingContext2D){
+        super();
+    }
     render(ex: ExCanvasRenderingContext2D) {
+        this.ex.context.clearRect(0, 0, this.ex.canvas.width, this.ex.canvas.height);
+        this.updateBoundingbox();
+        super.render(ex);
+    }
+}
+class Circle extends Renderable {
+    color = '#87ceeb';
+    draw(ex: ExCanvasRenderingContext2D) {
         const radius = Math.min(this.w, this.h)/2.0;
         ex.context.beginPath();
         ex.arc(radius, 0, radius, 0, 2 * Math.PI, false);
@@ -166,17 +229,17 @@ class Circle extends Rect implements Renderable {
         ex.stroke();
     }
 }
-class Solid extends Rect implements Renderable {
+class Solid extends Renderable {
     color = '#87ceeb';
-    render(ex: ExCanvasRenderingContext2D) {
+    draw(ex: ExCanvasRenderingContext2D) {
         ex.context.fillStyle = this.color;
         ex.fillRect(0, 0, this.w, this.h);
     }
 }
-class Border extends Rect implements Renderable {
+class Border extends Renderable {
     width = 1;
     color = '#87ceeb';
-    render(ex: ExCanvasRenderingContext2D){
+    draw(ex: ExCanvasRenderingContext2D){
         ex.context.lineWidth = this.width;
         ex.context.strokeStyle = this.color;
         ex.context.beginPath();
@@ -184,7 +247,79 @@ class Border extends Rect implements Renderable {
         ex.stroke();
     }
 }
-class Group extends Rect implements Renderable {
+class StickBox extends Border implements TouchHandler{
+    stick = {
+        padding : 4,
+        scale : new Solid(),
+        rotate : new Circle(),
+    }
+
+    isFocus = false;
+    isScale = false;
+    isRotate = false;
+    
+    constructor(protected ex: ExCanvasRenderingContext2D, x = 0, y = 0, w = 0, h = 0, ) {
+        super();
+        this.attach(this.stick.scale);
+        this.attach(this.stick.rotate);
+
+        this.scale(w, h); 
+    }
+    down(obj: Renderable, x: number, y: number) {
+        this.isFocus = this.includes(x, y);
+        this.isScale = this.scalePoint.includes(x, y);
+        this.isRotate = this.rotatePoint.includes(x, y);
+    }
+    move(obj: Renderable, x: number, y: number) {
+        throw new Error("Method not implemented.");
+    }
+    up(obj: Renderable) {
+        throw new Error("Method not implemented.");
+    }
+    scale(w, h){
+        super.scale(w, h);
+        this.stick.rotate.reset(this.w - this.stick.padding, - this.stick.padding, this.stick.padding*2,  this.stick.padding*2);
+        this.stick.scale.reset(this.w - this.stick.padding, this.h - this.stick.padding, this.stick.padding*2, this.stick.padding*2);
+    }
+    getAngle(offsetX, offsetY){
+        return Math.atan(offsetY/offsetX);
+    }
+    render(ex: ExCanvasRenderingContext2D) {
+    }
+    onMousedown(x: number, y: number) {
+        this.isFocus = this.includes(x, y);
+        this.isScale = this.scalePoint.includes(x, y);
+        this.isRotate = this.rotatePoint.includes(x, y);
+        /* if(!this.startPoint) {
+            this.startPoint = {x : super.absolute('x'), y : super.absolute('y')}
+        } */
+        if(this.isFocus){
+            /* this.endPoint.x = x - super.absolute('x');
+            this.endPoint.y = y - super.absolute('y'); */
+            this.startPoint.x = x;
+            this.startPoint.y = y;
+        }
+        console.log('onMousedown isRotate', this.isRotate);
+    }
+    onMousemove(x: number, y: number) {
+        if(this.isFocus && !this.isScale && !this.isRotate){
+            //super.translate(x - this.startPoint.x - this.endPoint.x, y - this.startPoint.y - this.endPoint.y);       
+            this.translateTo(x - this.startPoint.x, y - this.startPoint.y);
+        }else if(this.isScale) {
+            this.reset(x, y, x - this.startPoint.x, y - this.startPoint.y)
+        }else if(this.isRotate) {
+            this.rotate(this.getAngle(x - this.startPoint.x, y - this.startPoint.y));
+        }
+        console.log('onMousemove isRotate', this.isRotate, x, y, this.startPoint, x - this.startPoint.x, y - this.startPoint.y, this.absolute('_x'), this.absolute('_y'), super.angle);
+    }
+    onMouseup() {
+        this.isFocus = false;
+        this.isScale = false;
+        this.isRotate = false;
+        console.log('onMouseup',   this.x, this.y, this.w, this.h)
+    }
+} 
+class GroupBox extends Renderable {
     pointRadius = 4;
     scalePoint: Solid = null;
     rotatePoint: Circle = null;
@@ -323,6 +458,9 @@ export class Text extends Group {
 export class RenderManger extends Rect {
     constructor(private ex: ExCanvasRenderingContext2D){
         super(0, 0, ex.canvas.width, ex.canvas.height);
+    }
+    clear() {
+        this.ex.context.clearRect(0, 0, this.ex.canvas.width, this.ex.canvas.height);
     }
     render() {
         this.ex.context.clearRect(0, 0, this.ex.canvas.width, this.ex.canvas.height);

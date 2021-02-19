@@ -61,7 +61,7 @@ const rotate2d: IRotate2d = (v: IVector2d, delta: number): IVector2d => {
         x2 : sin, y2 : cos,
     });
 }
-class Vector2d implements IVector2d{
+export class Vector2d implements IVector2d{
     x: number;
     y: number;
     constructor(x: number = 0, y: number = 0){
@@ -84,36 +84,55 @@ class Vector2d implements IVector2d{
         this.y = this.x * sin + this.y * cos;
         return this;
     }
+    transfrom(bb: BoundingBox) {
+        this.rotate(bb.angle).add(bb);
+    }
+    le(x: number, y: number) {
+        return this.x < x && this.y < y;
+    }
+    gt(x: number, y: number) {
+        return this.x > x && this.y > y;
+    }
 }
 export class Rect2d {
-    offset = new Vector2d();
     angle = 0;
-    reversed = new Vector2d();
-    constructor(public x: number, public y: number, public w: number, public h: number){
+    position = new Vector2d();
+    constructor(public w: number = 0, public h: number = 0){
     }
-    reset(x: number, y: number, w: number, h: number) {
-        this.x = x;
-        this.y = y;
+    reset(x: number, y: number, w: number, h: number, angle: number = 0) {
+        this.position.x = x;
+        this.position.y = y;
         this.w = w;
         this.h = h;
-        this.offset.x = x;
-        this.offset.y = y;
+        this.angle = angle;
+    }
+    scale(w: number, h: number){
+        this.w = w;
+        this.h = h;
     }
     translateTo(x: number, y: number) {
-        this.offset.x = x;
-        this.offset.y = y;
+        this.position.x = x;
+        this.position.y = y;
     }
     translate(x: number, y: number) {
-        this.offset.add({x, y});
+        this.position.add({x, y});
     }
     rotate(angle: number) {
         this.angle += angle;
     }
-    includes(x: number, y: number) {
-        this.reversed.x = x;
-        this.reversed.y = y;
-        this.reversed.rotate(this.angle).add(this.offset);
-        return this.reversed.x > this.x && this.reversed.y > this.y && this.reversed.x < this.x + this.w && this.reversed.y < this.y + this.h
+    rotateTo(angle: number) {
+        this.angle += angle;
+    }
+    includes(point: Vector2d) {
+        return this.position.gt(point.x, point.y) && this.position.le(point.x + this.w, point.y + this.h);
+    }
+}
+
+export class BoundingBox extends Vector2d {
+    angle = 0;
+    update(rect: Rect2d) {
+        this.add(rect.position);
+        this.angle += rect.angle;
     }
 }
 
