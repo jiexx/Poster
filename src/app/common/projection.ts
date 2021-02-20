@@ -68,6 +68,9 @@ export class Vector2d implements IVector2d{
         this.x = x;
         this.y = y;
     }
+    atan(){
+        return Math.atan(this.y/this.x);
+    }
     add(v: IVector2d) {
         this.x += v.x;
         this.y += v.y;
@@ -106,9 +109,13 @@ export class Rect2d {
         this.h = h;
         this.angle = angle;
     }
-    scale(w: number, h: number){
+    scaleTo(w: number, h: number){
         this.w = w;
         this.h = h;
+    }
+    scale(w: number, h: number){
+        this.w += w;
+        this.h += h;
     }
     translateTo(x: number, y: number) {
         this.position.x = x;
@@ -133,6 +140,10 @@ export class BoundingBox extends Vector2d {
     update(rect: Rect2d) {
         this.add(rect.position);
         this.angle += rect.angle;
+    }
+    clear(){
+        this.x = 0;
+        this.y = 0;
     }
 }
 

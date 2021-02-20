@@ -3,6 +3,13 @@ import { sample, timestamp } from "rxjs/operators";
 import { BoundingBox, Rect2d, Vector2d } from "../projection";
 
 export class ExCanvasRenderingContext2D {
+    dummyfont = null;
+    measureText(str: string) {
+        let metrics = this.context.measureText(str);
+        let h = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+        let w = metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight;
+        return {width: w, height: h};
+    }
     PIXEL_RATIO = 1.0;
     pixelRatio() {
         let dpr = window['devicePixelRatio'] ||
@@ -33,7 +40,6 @@ export class ExCanvasRenderingContext2D {
         //this.context.translate(0.5, 0.5);
         //this.context.setTransform(this.PIXEL_RATIO, 0, 0, this.PIXEL_RATIO, 0, 0)
         container.append(this.canvas);
-        
         return this.canvas;
     }
     context: CanvasRenderingContext2D = null;
@@ -48,6 +54,7 @@ export class ExCanvasRenderingContext2D {
                 this.context[m].apply(this.context, args);
             }
         })
+        this.dummyfont = this.measureText('|');
     }
     methods = [
         'fillRect' ,
@@ -130,19 +137,20 @@ class Renderable extends Rect2d {
     render(ex: ExCanvasRenderingContext2D) {
         this.before(ex);
         this.draw(ex);
+        this.children.forEach(child => {
+            child.render(ex);
+        })
         this.after(ex);
     }
     after(ex: ExCanvasRenderingContext2D) {
         ex.context.restore();
     }
     draw(ex: ExCanvasRenderingContext2D) {
-        this.children.forEach(child => {
-            child.render(ex);
-        })
+
     }
-    updateBoundingbox() {
+    updateBoundingbox(clear = false) {
         this.children.forEach(child => {
-            child.boundingbox.update(this as any);
+            clear ? child.boundingbox.clear() : child.boundingbox.update(this as any);
             child.updateBoundingbox();
         })
     }
@@ -154,28 +162,27 @@ class Renderable extends Rect2d {
         this.children.push(child);
     }
 }
+interface TouchHandler{
+    down(touch: Vector2d);
+    move(offset: Vector2d);
+    up();
+}
+interface KeyHandler{
+    key(data: {key: string, str: string});
+}
 class Dispatcher {
-    dispatch(command:string, data: any) {
-        this['children'].forEach(child => {
-            let result = true;
+    dispatch(root: Renderable, command:string, data: any) {
+        root.children.forEach(child => {
+            let invalid = false;
             if(child[command]) {
-                result = child[command].call(child, data)
+                invalid = child[command].call(child, data)
             }
-            if(result && child['dispatch']) {
-                child['dispatch'](command, data);
+            if(!invalid) {
+                this.dispatch(child, command, data);
             }
         });
     }
 }
-interface TouchHandler extends Dispatcher{
-    down(x: number, y: number);
-    move(x: number, y: number);
-    up();
-}
-interface KeyHandler extends Dispatcher{
-    key(str: string);
-}
-
 class Touch extends Dispatcher{
     start = new Vector2d();
     offset = new Vector2d();
@@ -188,32 +195,56 @@ class Touch extends Dispatcher{
     A(offsetX, offsetY){
         return Math.atan(offsetY/offsetX);
     }
-    onDown(event) {
+    onDown(root: Renderable, event) {
         this.start.x = this.X(event);
         this.start.y = this.Y(event);
-        this.dispatch('down', this.start);
+        this.dispatch(root, 'down', this.start);
     }
-    onMove(event) {
+    onMove(root: Renderable, event) {
         this.offset.x = this.X(event) - this.start.x;
         this.offset.y = this.Y(event) - this.start.y;
-        this.dispatch('move', this.offset);
+        this.dispatch(root, 'move', this.offset);
     }
-    onUp() {
-        this.dispatch('up', 0);
+    onUp(root: Renderable) {
+        this.dispatch(root, 'up', 0);
     }
-    onKey(event: KeyboardEvent) {
-        this.dispatch('key', event.key);
+    onKey(root: Renderable, event: KeyboardEvent, str) {
+        this.dispatch(root, 'key', {key:event.key, str:str});
     }
 }
-class RenderMgr extends Renderable{
-    touch = new Touch();
+export class RenderManger extends Touch {
+    root = new Renderable();
     constructor(private ex: ExCanvasRenderingContext2D){
         super();
     }
-    render(ex: ExCanvasRenderingContext2D) {
+    render() {
         this.ex.context.clearRect(0, 0, this.ex.canvas.width, this.ex.canvas.height);
-        this.updateBoundingbox();
-        super.render(ex);
+        this.root.updateBoundingbox(true);
+        this.root.updateBoundingbox();
+        this.root.render(this.ex);
+    }
+    onDown(event) {
+        super.onDown(this.root, event);
+        this.render();
+    }
+    onMove(event) {
+        super.onMove(this.root, event);
+        this.render();
+    }
+    onUp() {
+        super.onUp(this.root);
+        this.render()
+    }
+    onKeyborad(event: KeyboardEvent, str) {
+        super.onKey(this.root, event, str);
+        this.render();
+    }
+    debug = 1;
+    createText(){
+        if(this.debug == 1) {
+            this.root.attach(new StickText());
+            this.debug = 2;
+        }
     }
 }
 class Circle extends Renderable {
@@ -221,7 +252,7 @@ class Circle extends Renderable {
     draw(ex: ExCanvasRenderingContext2D) {
         const radius = Math.min(this.w, this.h)/2.0;
         ex.context.beginPath();
-        ex.arc(radius, 0, radius, 0, 2 * Math.PI, false);
+        ex.arc(radius, radius, radius, 0, 2 * Math.PI, false);
         ex.context.fillStyle = this.color;
         ex.context.fill();
         ex.context.lineWidth = 1;
@@ -238,16 +269,16 @@ class Solid extends Renderable {
 }
 class Border extends Renderable {
     width = 1;
-    color = '#87ceeb';
+    borderColor = '#87ceeb';
     draw(ex: ExCanvasRenderingContext2D){
         ex.context.lineWidth = this.width;
-        ex.context.strokeStyle = this.color;
+        ex.context.strokeStyle = this.borderColor;
         ex.context.beginPath();
         ex.rect(0.5, 0.5, this.w, this.h);
         ex.stroke();
     }
 }
-class StickBox extends Border implements TouchHandler{
+class StickBorder extends Border implements TouchHandler{
     stick = {
         padding : 4,
         scale : new Solid(),
@@ -258,258 +289,67 @@ class StickBox extends Border implements TouchHandler{
     isScale = false;
     isRotate = false;
     
-    constructor(protected ex: ExCanvasRenderingContext2D, x = 0, y = 0, w = 0, h = 0, ) {
+    constructor() {
         super();
         this.attach(this.stick.scale);
         this.attach(this.stick.rotate);
-
-        this.scale(w, h); 
     }
-    down(obj: Renderable, x: number, y: number) {
-        this.isFocus = this.includes(x, y);
-        this.isScale = this.scalePoint.includes(x, y);
-        this.isRotate = this.rotatePoint.includes(x, y);
+    down(touch: Vector2d) {
+        this.isFocus = this.includes(touch);
+        this.isScale = this.stick.scale.includes(touch);
+        this.isRotate = this.stick.scale.includes(touch);
     }
-    move(obj: Renderable, x: number, y: number) {
-        throw new Error("Method not implemented.");
+    move(offset: Vector2d) {
+        if(this.isFocus && !this.isScale && !this.isRotate){
+            this.translateTo(offset.x, offset.y);
+        }else if(this.isScale) {
+            this.scaleTo(offset.x, offset.y)
+        }else if(this.isRotate) {
+            this.rotate(offset.atan());
+        }
     }
-    up(obj: Renderable) {
-        throw new Error("Method not implemented.");
+    up() {
+        this.isFocus = false;
+        this.isScale = false;
+        this.isRotate = false;
     }
-    scale(w, h){
-        super.scale(w, h);
+    scaleTo(w, h){
+        super.scaleTo(w, h);
         this.stick.rotate.reset(this.w - this.stick.padding, - this.stick.padding, this.stick.padding*2,  this.stick.padding*2);
         this.stick.scale.reset(this.w - this.stick.padding, this.h - this.stick.padding, this.stick.padding*2, this.stick.padding*2);
     }
-    getAngle(offsetX, offsetY){
-        return Math.atan(offsetY/offsetX);
-    }
-    render(ex: ExCanvasRenderingContext2D) {
-    }
-    onMousedown(x: number, y: number) {
-        this.isFocus = this.includes(x, y);
-        this.isScale = this.scalePoint.includes(x, y);
-        this.isRotate = this.rotatePoint.includes(x, y);
-        /* if(!this.startPoint) {
-            this.startPoint = {x : super.absolute('x'), y : super.absolute('y')}
-        } */
-        if(this.isFocus){
-            /* this.endPoint.x = x - super.absolute('x');
-            this.endPoint.y = y - super.absolute('y'); */
-            this.startPoint.x = x;
-            this.startPoint.y = y;
-        }
-        console.log('onMousedown isRotate', this.isRotate);
-    }
-    onMousemove(x: number, y: number) {
-        if(this.isFocus && !this.isScale && !this.isRotate){
-            //super.translate(x - this.startPoint.x - this.endPoint.x, y - this.startPoint.y - this.endPoint.y);       
-            this.translateTo(x - this.startPoint.x, y - this.startPoint.y);
-        }else if(this.isScale) {
-            this.reset(x, y, x - this.startPoint.x, y - this.startPoint.y)
-        }else if(this.isRotate) {
-            this.rotate(this.getAngle(x - this.startPoint.x, y - this.startPoint.y));
-        }
-        console.log('onMousemove isRotate', this.isRotate, x, y, this.startPoint, x - this.startPoint.x, y - this.startPoint.y, this.absolute('_x'), this.absolute('_y'), super.angle);
-    }
-    onMouseup() {
-        this.isFocus = false;
-        this.isScale = false;
-        this.isRotate = false;
-        console.log('onMouseup',   this.x, this.y, this.w, this.h)
-    }
 } 
-class GroupBox extends Renderable {
-    pointRadius = 4;
-    scalePoint: Solid = null;
-    rotatePoint: Circle = null;
-    startPoint: {x: number, y: number} = null;
-    endPoint = {x: -1, y: -1};
-    border: Border = null;
+
+export class StickText extends StickBorder implements KeyHandler {
     padding = 5;
-    isFocus = false;
-    isScale = false;
-    isRotate = false;
-    
-    mouseDown = false;
-    constructor(protected ex: ExCanvasRenderingContext2D, x = 0, y = 0, w = 0, h = 0, ) {
-        super();
-        
-        this.scalePoint = new Solid();
-        this.attach(this.scalePoint);
-
-        this.rotatePoint = new Circle();
-        this.attach(this.rotatePoint);
-
-        this.border = new Border();
-        this.attach(this.border);
-
-        this.reset(x, y, w, h); 
-    }
-    reset(x, y, w, h){
-        this.reset(this.x, this.y, w, h);
-        this.border.reset(- this.padding, - this.padding, this.w + (this.padding*2),  this.h + (this.padding*2));
-        this.rotatePoint.reset(this.w + this.padding - this.pointRadius, - this.pointRadius, this.pointRadius*2,  this.pointRadius*2);
-        this.scalePoint.reset(this.w + this.padding - this.pointRadius, this.h + this.padding - this.pointRadius, this.pointRadius*2, this.pointRadius*2);
-    }
-    getAngle(offsetX, offsetY){
-        return Math.atan(offsetY/offsetX);
-    }
-    render(ex: ExCanvasRenderingContext2D) {
-    }
-    onMousedown(x: number, y: number) {
-        this.isFocus = this.includes(x, y);
-        this.isScale = this.scalePoint.includes(x, y);
-        this.isRotate = this.rotatePoint.includes(x, y);
-        /* if(!this.startPoint) {
-            this.startPoint = {x : super.absolute('x'), y : super.absolute('y')}
-        } */
-        if(this.isFocus){
-            /* this.endPoint.x = x - super.absolute('x');
-            this.endPoint.y = y - super.absolute('y'); */
-            this.startPoint.x = x;
-            this.startPoint.y = y;
-        }
-        console.log('onMousedown isRotate', this.isRotate);
-    }
-    onMousemove(x: number, y: number) {
-        if(this.isFocus && !this.isScale && !this.isRotate){
-            //super.translate(x - this.startPoint.x - this.endPoint.x, y - this.startPoint.y - this.endPoint.y);       
-            this.translateTo(x - this.startPoint.x, y - this.startPoint.y);
-        }else if(this.isScale) {
-            this.reset(x, y, x - this.startPoint.x, y - this.startPoint.y)
-        }else if(this.isRotate) {
-            this.rotate(this.getAngle(x - this.startPoint.x, y - this.startPoint.y));
-        }
-        console.log('onMousemove isRotate', this.isRotate, x, y, this.startPoint, x - this.startPoint.x, y - this.startPoint.y, this.absolute('_x'), this.absolute('_y'), super.angle);
-    }
-    onMouseup() {
-        this.isFocus = false;
-        this.isScale = false;
-        this.isRotate = false;
-        console.log('onMouseup',   this.x, this.y, this.w, this.h)
-    }
-} 
-
-export class Text extends Group {
     font = '16px Arial';
     color = '#000';
     focusIndex = 0;
-    constructor(ex: ExCanvasRenderingContext2D, public str = '') {
-        super(ex);
-    }
-    measureText(ex: ExCanvasRenderingContext2D, str: string) {
-        let metrics = ex.context.measureText(str);
-        let h = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-        let w = metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight;
-        return {width: w, height: h};
-    }
-    renderWrappingText(ex: ExCanvasRenderingContext2D, str: string){
-        console.log('wrap', str);
-        let W = 0, H = 0, x = 0, y = 0;
-        let offset = this.measureText(ex, '|');
-        for(let i = 0; i < str.length; i ++) {
-            ex.fillText(str[i], x, y);
-            //console.log(x, y, str[i]);
-            let {width, height} = this.measureText(ex, str[i]);
-            if(x + width > this.w + offset.height || str[i] == '\n') {
-                x = 0;
-                y += (height || offset.height) + this.padding;
-            }else{
-                x += width;
+    str = '';
+    layoutStr(ex: ExCanvasRenderingContext2D) {
+        let x = this.padding, y = this.padding, fontSize = null;
+        for(let i = 0 ; i < this.str.length ; i ++) {
+            fontSize = ex.measureText(this.str[i]);
+            if(this.str[i] == '\n' || x + fontSize.width + this.padding > this.w) {
+                x = this.padding;
+                y += (fontSize.height || ex.dummyfont.height) + this.padding;
+            }else {
+                x += fontSize.width;
             }
-            W = x > W ? x : W;
-            H = y;
+            ex.fillText(this.str[i], x, y);
         }
-        this.reset(- this.padding, - offset.height - this.padding, Math.max(this.w, W + offset.height + this.padding) , Math.max(this.h, H + offset.height + this.padding) );
+        this.scaleTo(
+            y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding, 
+            y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding
+        );
     }
-    render(ex: ExCanvasRenderingContext2D) {
-        super.render(ex);
+    draw(ex: ExCanvasRenderingContext2D) {
         ex.context.font = this.font;
         ex.context.fillStyle = this.color;
-        this.renderWrappingText(ex, this.str);
+        this.layoutStr(ex);
+        super.draw(ex);
     }
-    onMousedown(x: number, y: number) {
-        super.onMousedown(x, y);
-    }
-    onKeyUp(e: KeyboardEvent, str: string) {
-        if (this.isFocus) {
-            //e.preventDefault();
-        }
-        if (this.isFocus && e.key === "Backspace") {
-            let txt = "";
-            for (let i = 0; i < str.length; i++) {
-                if (i !== this.focusIndex - 1) {
-                    txt += str[i];
-                }
-            }
-            str = txt;
-            this.focusIndex--;
-            if (this.focusIndex < 0) {
-                this.focusIndex = 0;
-            }
-        }
-        if(this.isFocus && this.str != str) {
-            this.str = str;
-        }
-    }
-}
-
-export class RenderManger extends Rect {
-    constructor(private ex: ExCanvasRenderingContext2D){
-        super(0, 0, ex.canvas.width, ex.canvas.height);
-    }
-    clear() {
-        this.ex.context.clearRect(0, 0, this.ex.canvas.width, this.ex.canvas.height);
-    }
-    render() {
-        this.ex.context.clearRect(0, 0, this.ex.canvas.width, this.ex.canvas.height);
-        this.ex.context.save();
-        this.ex.context.translate(this.x, this.y);
-        if(this.angle < -0.00001 || this.angle > 0.00001 ) {
-            this.ex.context.rotate(this.angle);
-        }
-        this.children.forEach((child: Text) => {
-            child.update(this.ex);
-        })
-        this.ex.context.restore();
-    }
-    debug = 1;
-    createText(){
-        if(this.debug == 1) {
-            let text = new Text(this.ex);
-            text.translate(0, 0);
-            this.attach(text);
-            this.debug = 2;
-        }
-    }
-    onMousedown(event) {
-        this.children.forEach((child: Text) => {
-            console.log('onMousedown', event, this.x, this.y);
-            child.onMousedown(
-                (event.x || event.changedTouches[0].clientX) - event.target.getBoundingClientRect().left, 
-                (event.y || event.changedTouches[0].clientY) - event.target.getBoundingClientRect().top);
-        })
-        this.render();
-    }
-    onMousemove(event) {
-        this.children.forEach((child: Text) => {
-            child.onMousemove(
-                (event.x || event.changedTouches[0].clientX) - event.target.getBoundingClientRect().left, 
-                (event.y || event.changedTouches[0].clientY) - event.target.getBoundingClientRect().top);
-        })
-        this.render();
-    }
-    onMouseup(){
-        this.children.forEach((child: Text) => {
-            child.onMouseup();
-        })
-        this.render();
-    }
-    onKeyUp(e: KeyboardEvent, str: string) {
-        this.children.forEach((child: Text) => {
-            child.onKeyUp(e, str);
-        })
-        this.render();
+    key(data: { key: string; str: string; }) {
+        this.str = data.str;
     }
 }

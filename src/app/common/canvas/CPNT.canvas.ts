@@ -1,6 +1,6 @@
 import { AfterViewInit } from '@angular/core';
 import { Component, OnChanges, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { ExCanvasRenderingContext2D, RenderManger, Text } from './exCanvas';
+import { ExCanvasRenderingContext2D, RenderManger } from './exCanvas';
 
 
 
@@ -189,40 +189,27 @@ export class CCanvas implements OnChanges, AfterViewInit  {
     ngAfterViewInit() {
         //this.text = new Text(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
         this.mgr = new RenderManger(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
-        this.mgr.translate(50,100);
+        this.mgr.root.translate(50,100);
         this.initHiddenTextarea();
     }
-    private mouseDown: boolean = false;
     @HostListener('touchend')
     @HostListener('mouseup')
     onMouseup() {
-        this.mouseDown = false;
-        this.mgr.onMouseup();
+        this.mgr.onUp();
     }
     @HostListener('touchmove', ['$event'])
     onMousemove(event) {
-        if (this.mouseDown) {
-            this.mgr.onMousemove(event);
-        }
+        this.mgr.onMove(event);
     }
     @HostListener('touchstart', ['$event'])
     @HostListener('mousedown', ['$event'])
     onMousedown(event) {
-        this.mouseDown = true;
         this.mgr.createText();
-        this.mgr.onMousedown(event);
+        this.mgr.onDown(event);
         this.textarea.focus();
-        console.log('mousedown', this.mouseDown)
-    }
-    @HostListener('window:keyup', ['$event'])
-    onKeyUp(event: KeyboardEvent) {
-        // Your row selection code
-        //this.text.handleOnKeyUp();
     }
     @HostListener('window:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
-        // Your row selection code
-        //this.text.handleOnKeyDown(event);
         this.textarea.focus();
     }
     @HostListener('click', ['$event']) 
@@ -231,7 +218,6 @@ export class CCanvas implements OnChanges, AfterViewInit  {
             event.target.focus();
             event.target.click();
         }
-        //this.text.handleOnClick(event);
     }
     private textarea: HTMLTextAreaElement = null;
     initHiddenTextarea() {
@@ -250,7 +236,7 @@ export class CCanvas implements OnChanges, AfterViewInit  {
         textarea.style.fontSize = '1px';
         textarea.onkeyup = (e)=>{
             console.log(textarea.value)
-            this.mgr.onKeyUp(e, textarea.value);
+            this.mgr.onKeyborad(e, textarea.value);
             this.textarea.focus();
         };
         document.body.appendChild(textarea);
