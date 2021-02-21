@@ -150,8 +150,8 @@ class Renderable extends Rect2d {
     }
     updateBoundingbox(clear = false) {
         this.children.forEach(child => {
-            clear ? child.boundingbox.clear() : child.boundingbox.update(this as any);
-            child.updateBoundingbox();
+            clear ? child.boundingbox.clear() : child.boundingbox.update(this).update(child);
+            child.updateBoundingbox(clear);
         })
     }
     includes(point: Vector2d) {
@@ -185,6 +185,7 @@ class Dispatcher {
 }
 class Touch extends Dispatcher{
     start = new Vector2d();
+    point = new Vector2d();
     offset = new Vector2d();
     X(event) {
         return (event.x || event.changedTouches[0].clientX) - event.target.getBoundingClientRect().left
@@ -196,14 +197,17 @@ class Touch extends Dispatcher{
         return Math.atan(offsetY/offsetX);
     }
     onDown(root: Renderable, event) {
-        this.start.x = this.X(event);
-        this.start.y = this.Y(event);
-        this.dispatch(root, 'down', this.start);
+        this.point.x = this.offset.x = this.X(event);
+        this.point.y = this.offset.y = this.Y(event);
+        this.dispatch(root, 'down', this.point);
     }
     onMove(root: Renderable, event) {
-        this.offset.x = this.X(event) - this.start.x;
-        this.offset.y = this.Y(event) - this.start.y;
+        let X = this.X(event), Y = this.Y(event);
+        this.offset.x = X - this.offset.x;
+        this.offset.y = Y - this.offset.y;
         this.dispatch(root, 'move', this.offset);
+        this.offset.x = X;
+        this.offset.y = Y;
     }
     onUp(root: Renderable) {
         this.dispatch(root, 'up', 0);
@@ -217,30 +221,37 @@ export class RenderManger extends Touch {
     constructor(private ex: ExCanvasRenderingContext2D){
         super();
     }
-    render() {
+    clear() {
         this.ex.context.clearRect(0, 0, this.ex.canvas.width, this.ex.canvas.height);
         this.root.updateBoundingbox(true);
         this.root.updateBoundingbox();
+    }
+    render() {
         this.root.render(this.ex);
     }
     onDown(event) {
+        this.clear();
         super.onDown(this.root, event);
         this.render();
     }
     onMove(event) {
+        this.clear();
         super.onMove(this.root, event);
         this.render();
     }
     onUp() {
+        this.clear();
         super.onUp(this.root);
         this.render()
     }
     onKeyborad(event: KeyboardEvent, str) {
+        this.clear();
         super.onKey(this.root, event, str);
         this.render();
     }
     debug = 1;
     createText(){
+        this.clear();
         if(this.debug == 1) {
             this.root.attach(new StickText());
             this.debug = 2;
@@ -301,12 +312,16 @@ class StickBorder extends Border implements TouchHandler{
     }
     move(offset: Vector2d) {
         if(this.isFocus && !this.isScale && !this.isRotate){
-            this.translateTo(offset.x, offset.y);
+            this.translate(offset.x, offset.y);
         }else if(this.isScale) {
             this.scaleTo(offset.x, offset.y)
         }else if(this.isRotate) {
             this.rotate(offset.atan());
         }
+        if(this.position.x > 10){
+            let i = 1;
+        }
+        console.log('move', offset, this.position);
     }
     up() {
         this.isFocus = false;

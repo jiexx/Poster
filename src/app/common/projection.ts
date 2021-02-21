@@ -68,6 +68,10 @@ export class Vector2d implements IVector2d{
         this.x = x;
         this.y = y;
     }
+    zero(){
+        this.x = 0;
+        this.y = 0;
+    }
     atan(){
         return Math.atan(this.y/this.x);
     }
@@ -88,7 +92,7 @@ export class Vector2d implements IVector2d{
         return this;
     }
     transfrom(bb: BoundingBox) {
-        this.rotate(bb.angle).add(bb);
+        this.rotate(bb.angle).sub(bb);
     }
     le(x: number, y: number) {
         return this.x < x && this.y < y;
@@ -131,7 +135,7 @@ export class Rect2d {
         this.angle += angle;
     }
     includes(point: Vector2d) {
-        return this.position.gt(point.x, point.y) && this.position.le(point.x + this.w, point.y + this.h);
+        return point.gt(0, 0) && point.le(this.position.x + this.w, this.position.y + this.h);
     }
 }
 
@@ -140,6 +144,7 @@ export class BoundingBox extends Vector2d {
     update(rect: Rect2d) {
         this.add(rect.position);
         this.angle += rect.angle;
+        return this;
     }
     clear(){
         this.x = 0;
