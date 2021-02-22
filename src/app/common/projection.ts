@@ -71,6 +71,7 @@ export class Vector2d implements IVector2d{
     zero(){
         this.x = 0;
         this.y = 0;
+        return this;
     }
     atan(){
         return Math.atan(this.y/this.x);
@@ -135,20 +136,34 @@ export class Rect2d {
         this.angle += angle;
     }
     includes(point: Vector2d) {
-        return point.gt(0, 0) && point.le(this.position.x + this.w, this.position.y + this.h);
+        return point.gt(0, 0) && point.le(this.w, this.h);
     }
 }
 
 export class BoundingBox extends Vector2d {
     angle = 0;
-    update(rect: Rect2d) {
-        this.add(rect.position);
-        this.angle += rect.angle;
+    transform(v: Vector2d, angle: number) {
+        this.add(v);
+        this.angle += angle;
         return this;
     }
-    clear(){
+    justify(bb: BoundingBox) {
+        this.x = bb.x;
+        this.y = bb.y;
+        this.angle = bb.angle;
+        return this;
+    }
+    clear(v: Vector2d, angle: number){
         this.x = 0;
         this.y = 0;
+    }
+    includes(point: Vector2d, w: number, h: number) {
+        //point.rotate(this.angle).sub(this);
+        let sin = Math.sin(this.angle), cos = Math.cos(this.angle);
+        let x = point.x * cos - point.y * sin - this.x;
+        let y = point.x * sin + point.y * cos - this.y;
+        //Rect2d.includes(point)
+        return x > 0 && y > 0 && x < w && y < h;
     }
 }
 

@@ -149,21 +149,25 @@ class Renderable extends Rect2d {
 
     }
     updateBoundingbox(clear = false) {
+        !clear ? this.boundingbox.transform(this.position, this.angle) : this.boundingbox.zero();
         this.children.forEach(child => {
-            clear ? child.boundingbox.clear() : child.boundingbox.update(this).update(child);
+            if(!clear) {
+                child.boundingbox.justify(this.boundingbox);
+            }
             child.updateBoundingbox(clear);
         })
     }
     includes(point: Vector2d) {
-        point.transfrom(this.boundingbox);
-        return super.includes(point)
+        /* point.transfrom(this.boundingbox);
+        return super.includes(point) */
+        return this.boundingbox.includes(point, this.w, this.h);
     }
     attach(child: Renderable) {
         this.children.push(child);
     }
 }
 interface TouchHandler{
-    down(touch: Vector2d);
+    down(touch: Vector2d); 
     move(offset: Vector2d);
     up();
 }
@@ -314,7 +318,7 @@ class StickBorder extends Border implements TouchHandler{
         if(this.isFocus && !this.isScale && !this.isRotate){
             this.translate(offset.x, offset.y);
         }else if(this.isScale) {
-            this.scaleTo(offset.x, offset.y)
+            this.scale(offset.x, offset.y)
         }else if(this.isRotate) {
             this.rotate(offset.atan());
         }
@@ -324,9 +328,14 @@ class StickBorder extends Border implements TouchHandler{
         console.log('move', offset, this.position);
     }
     up() {
-        this.isFocus = false;
+        this.isFocus = false; 
         this.isScale = false;
         this.isRotate = false;
+    }
+    scale(w, h){
+        super.scale(w, h);
+        this.stick.rotate.reset(this.w - this.stick.padding, - this.stick.padding, this.stick.padding*2,  this.stick.padding*2);
+        this.stick.scale.reset(this.w - this.stick.padding, this.h - this.stick.padding, this.stick.padding*2, this.stick.padding*2);
     }
     scaleTo(w, h){
         super.scaleTo(w, h);
@@ -341,6 +350,7 @@ export class StickText extends StickBorder implements KeyHandler {
     color = '#000';
     focusIndex = 0;
     str = '';
+
     layoutStr(ex: ExCanvasRenderingContext2D) {
         let x = this.padding, y = this.padding, fontSize = null;
         for(let i = 0 ; i < this.str.length ; i ++) {
@@ -354,8 +364,8 @@ export class StickText extends StickBorder implements KeyHandler {
             ex.fillText(this.str[i], x, y);
         }
         this.scaleTo(
-            y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding, 
-            y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding
+            Math.max(y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding, this.w + 2*this.padding), 
+            Math.max(y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding, this.h + 2*this.padding), 
         );
     }
     draw(ex: ExCanvasRenderingContext2D) {
