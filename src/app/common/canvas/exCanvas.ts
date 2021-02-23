@@ -312,7 +312,7 @@ class StickBorder extends Border implements TouchHandler{
     down(touch: Vector2d) {
         this.isFocus = this.includes(touch);
         this.isScale = this.stick.scale.includes(touch);
-        this.isRotate = this.stick.scale.includes(touch);
+        this.isRotate = this.stick.rotate.includes(touch);
     }
     move(offset: Vector2d) {
         if(this.isFocus && !this.isScale && !this.isRotate){
@@ -320,15 +320,14 @@ class StickBorder extends Border implements TouchHandler{
         }else if(this.isScale) {
             this.scale(offset.x, offset.y)
         }else if(this.isRotate) {
-            this.rotate(offset.atan());
+            this.rotate(this.stick.rotate.position.radius2(offset));
+            console.log('rotate', offset, this.angle)
         }
         if(this.position.x > 10){
             let i = 1;
         }
-        console.log('move', offset, this.position);
     }
     up() {
-        this.isFocus = false; 
         this.isScale = false;
         this.isRotate = false;
     }
@@ -364,8 +363,8 @@ export class StickText extends StickBorder implements KeyHandler {
             ex.fillText(this.str[i], x, y);
         }
         this.scaleTo(
-            Math.max(y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding, this.w + 2*this.padding), 
-            Math.max(y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding, this.h + 2*this.padding), 
+            Math.max(y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding, this.w), 
+            Math.max(y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding, this.h), 
         );
     }
     draw(ex: ExCanvasRenderingContext2D) {
@@ -375,6 +374,7 @@ export class StickText extends StickBorder implements KeyHandler {
         super.draw(ex);
     }
     key(data: { key: string; str: string; }) {
-        this.str = data.str;
+        if(this.isFocus) 
+            this.str = data.str;
     }
 }

@@ -76,6 +76,19 @@ export class Vector2d implements IVector2d{
     atan(){
         return Math.atan(this.y/this.x);
     }
+    radius(v: Vector2d) {
+        return Math.acos( this.dot(v) / ( this.length() * v.length() ) )
+    }
+    radius2(v: Vector2d) {
+        let a = this.atan();
+        return this.add(v).atan() - a;
+    }
+    length(){
+        return Math.sqrt(this.x*this.x + this.y*this.y) 
+    }
+    dot(v: Vector2d){
+        return this.x * v.x + this.y * v.y;
+    }
     add(v: IVector2d) {
         this.x += v.x;
         this.y += v.y;
@@ -88,8 +101,8 @@ export class Vector2d implements IVector2d{
     }
     rotate(angle: number) {
         let sin = Math.sin(angle), cos = Math.cos(angle);
-        this.x = this.x * cos - this.y * sin;
-        this.y = this.x * sin + this.y * cos;
+        this.x =   this.x * cos + this.y * sin;
+        this.y = - this.x * sin + this.y * cos;
         return this;
     }
     transfrom(bb: BoundingBox) {
@@ -160,9 +173,9 @@ export class BoundingBox extends Vector2d {
     includes(point: Vector2d, w: number, h: number) {
         //point.rotate(this.angle).sub(this);
         let sin = Math.sin(this.angle), cos = Math.cos(this.angle);
-        let x = point.x * cos - point.y * sin - this.x;
-        let y = point.x * sin + point.y * cos - this.y;
-        //Rect2d.includes(point)
+        let x =   point.x * cos + point.y * sin + this.x; 
+        let y = - point.x * sin + point.y * cos - this.y;
+        //Rect2d.includes(point) 
         return x > 0 && y > 0 && x < w && y < h;
     }
 }
