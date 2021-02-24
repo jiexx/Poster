@@ -156,7 +156,11 @@ export class Rect2d {
 export class BoundingBox extends Vector2d {
     angle = 0;
     transform(v: Vector2d, angle: number) {
-        this.add(v);
+        if(this.angle > 0.000001 || this.angle < -0.000001) {
+            this.rotate(-this.angle).add(v);
+        }else {
+            this.add(v);
+        }
         this.angle += angle;
         return this;
     }
@@ -166,16 +170,19 @@ export class BoundingBox extends Vector2d {
         this.angle = bb.angle;
         return this;
     }
-    clear(v: Vector2d, angle: number){
+    clear(){
         this.x = 0;
         this.y = 0;
+        this.angle = 0;
     }
     includes(point: Vector2d, w: number, h: number) {
         //point.rotate(this.angle).sub(this);
         let sin = Math.sin(this.angle), cos = Math.cos(this.angle);
-        let x =   point.x * cos + point.y * sin + this.x; 
-        let y = - point.x * sin + point.y * cos - this.y;
-        //Rect2d.includes(point) 
+        // let x =   point.x * cos + point.y * sin; 
+        // let y = - point.x * sin + point.y * cos;
+        let x =   ( point.x - this.x ) * cos + ( point.y - this.y ) * sin                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ; 
+        let y = - ( point.x - this.x ) * sin + ( point.y - this.y ) * cos;
+        //Rect2d.includes(point)   
         return x > 0 && y > 0 && x < w && y < h;
     }
 }
