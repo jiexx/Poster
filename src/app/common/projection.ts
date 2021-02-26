@@ -1,5 +1,3 @@
-import { transformAll } from "@angular/compiler/src/render3/r3_ast";
-
 export interface IVector2d {
     x: number;
     y: number;
@@ -105,8 +103,11 @@ export class Vector2d implements IVector2d{
         this.y = - this.x * sin + this.y * cos;
         return this;
     }
-    transfrom(bb: BoundingBox) {
-        this.rotate(bb.angle).sub(bb);
+    transfrom(position: Vector2d, angle: number) {
+        this.sub(position).rotate(angle)
+        this.x = -this.x;
+        this.y = -this.y;
+        return this;
     }
     le(x: number, y: number) {
         return this.x < x && this.y < y;
@@ -155,14 +156,8 @@ export class Rect2d {
 
 export class BoundingBox extends Vector2d {
     angle = 0;
-    transform(v: Vector2d, angle: number) {
-        if(this.angle > 0.000001 || this.angle < -0.000001) {
-            this.rotate(-this.angle).add(v);
-        }else {
-            this.add(v);
-        }
-        this.angle += angle;
-        return this;
+    constructor(){
+        super();
     }
     justify(bb: BoundingBox) {
         this.x = bb.x;
@@ -182,7 +177,7 @@ export class BoundingBox extends Vector2d {
         // let y = - point.x * sin + point.y * cos;
         let x =   ( point.x - this.x ) * cos + ( point.y - this.y ) * sin                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ; 
         let y = - ( point.x - this.x ) * sin + ( point.y - this.y ) * cos;
-        //Rect2d.includes(point)   
+        //Rect2d.includes(point)    
         return x > 0 && y > 0 && x < w && y < h;
     }
 }
