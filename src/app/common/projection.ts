@@ -1,5 +1,3 @@
-import { transformAll } from "@angular/compiler/src/render3/r3_ast";
-
 export interface IVector2d {
     x: number;
     y: number;
@@ -154,7 +152,6 @@ export class Rect2d {
         return point.gt(0, 0) && point.le(this.w, this.h);
     }
 }
-
 export class Matrix{
     constructor(
         public a00 = 1, public a01 = 0, public a02 = 0, 
@@ -183,16 +180,6 @@ export class Matrix{
         this.a20 = this.a20*m.a00+this.a21*m.a10+this.a22*m.a20, this.a21 = this.a20*m.a01+this.a21*m.a11+this.a22*m.a21, this.a22 = this.a20*m.a02+this.a21*m.a12+this.a22*m.a22;
         return this;
     }
-    /* includes(point: Vector2d, w: number, h: number) {
-        //point.rotate(this.angle).sub(this);
-        let sin = Math.sin(this.angle), cos = Math.cos(this.angle);
-        let x = point.x + this.x;
-        let y = point.y + this.y;
-        x =   x * cos + y * sin - this.x; 
-        y = - x * sin + y * cos - this.x;
-        //Rect2d.includes(point) 
-        return x > 0 && y > 0 && x < w && y < h;
-    } */
 }
 
 type Options = 'auto' | 'cover' | 'contain' | string /* "100% 100%" */;
