@@ -105,14 +105,16 @@ export class Vector2d implements IVector2d{
         this.y = - this.x * sin + this.y * cos;
         return this;
     }
-    transfrom(bb: BoundingBox) {
-        this.rotate(bb.angle).sub(bb);
-    }
     le(x: number, y: number) {
         return this.x < x && this.y < y;
     }
     gt(x: number, y: number) {
         return this.x > x && this.y > y;
+    }
+    mutiply(m:Matrix){
+        this.x = this.x*m.a00+this.y*m.a10+m.a20;
+        this.y = this.x*m.a01+this.y*m.a11+m.a21;
+        return this;
     }
 }
 export class Rect2d {
@@ -153,31 +155,44 @@ export class Rect2d {
     }
 }
 
-export class BoundingBox extends Vector2d {
-    angle = 0;
+export class Matrix{
+    constructor(
+        public a00 = 1, public a01 = 0, public a02 = 0, 
+        public a10 = 0, public a11 = 1, public a12 = 0, 
+        public a20 = 0, public a21 = 0, public a22 = 1, 
+    ){}
+    normalize(){
+        this.a00 = 1, this.a11 = 1, this.a22 = 1;
+        return this;
+    }
     transform(v: Vector2d, angle: number) {
-        this.add(v);
-        this.angle += angle;
+        let sin = Math.sin(angle), cos = Math.cos(angle);
+        this.a00 = cos, this.a01 = -sin, this.a02 = 0;
+        this.a10 = sin, this.a11 = cos, this.a12 = 0;
+        this.a20 = v.x, this.a21 = v.y, this.a22 = 0;
         return this;
     }
-    justify(bb: BoundingBox) {
-        this.x = bb.x;
-        this.y = bb.y;
-        this.angle = bb.angle;
+    clear(){
+        this.a00 = 0, this.a01 = 0, this.a02 = 0;
+        this.a10 = 0, this.a11 = 0, this.a12 = 0;
+        this.a20 = 0, this.a21 = 0, this.a22 = 0;
+    }
+    mutiply(m: Matrix){
+        this.a00 = this.a00*m.a00+this.a01*m.a10+this.a02*m.a20, this.a01 = this.a00*m.a01+this.a01*m.a11+this.a02*m.a21, this.a02 = this.a00*m.a02+this.a01*m.a12+this.a02*m.a22;
+        this.a10 = this.a10*m.a00+this.a11*m.a10+this.a12*m.a20, this.a11 = this.a10*m.a01+this.a11*m.a11+this.a12*m.a21, this.a12 = this.a10*m.a02+this.a11*m.a12+this.a12*m.a22;
+        this.a20 = this.a20*m.a00+this.a21*m.a10+this.a22*m.a20, this.a21 = this.a20*m.a01+this.a21*m.a11+this.a22*m.a21, this.a22 = this.a20*m.a02+this.a21*m.a12+this.a22*m.a22;
         return this;
     }
-    clear(v: Vector2d, angle: number){
-        this.x = 0;
-        this.y = 0;
-    }
-    includes(point: Vector2d, w: number, h: number) {
+    /* includes(point: Vector2d, w: number, h: number) {
         //point.rotate(this.angle).sub(this);
         let sin = Math.sin(this.angle), cos = Math.cos(this.angle);
-        let x =   point.x * cos + point.y * sin + this.x; 
-        let y = - point.x * sin + point.y * cos - this.y;
+        let x = point.x + this.x;
+        let y = point.y + this.y;
+        x =   x * cos + y * sin - this.x; 
+        y = - x * sin + y * cos - this.x;
         //Rect2d.includes(point) 
         return x > 0 && y > 0 && x < w && y < h;
-    }
+    } */
 }
 
 type Options = 'auto' | 'cover' | 'contain' | string /* "100% 100%" */;

@@ -1,6 +1,6 @@
 import { THIS_EXPR } from "@angular/compiler/src/output/output_ast";
 import { sample, timestamp } from "rxjs/operators";
-import { BoundingBox, Rect2d, Vector2d } from "../projection";
+import { Matrix, Rect2d, Vector2d } from "../projection";
 
 export class ExCanvasRenderingContext2D {
     dummyfont = null;
@@ -120,7 +120,7 @@ export class ExCanvasRenderingContext2D {
 }
 class Renderable extends Rect2d {
     children: Renderable[] = [];
-    boundingbox = new BoundingBox();
+    boundingbox = new Matrix();
     constructor(_x = 0, _y = 0, _w = 0, _h = 0, _angle = 0) {
         super(_w, _h);
         this.position.x = _x;
@@ -148,19 +148,18 @@ class Renderable extends Rect2d {
     draw(ex: ExCanvasRenderingContext2D) {
 
     }
-    updateBoundingbox(clear = false) {
-        !clear ? this.boundingbox.transform(this.position, this.angle) : this.boundingbox.zero();
+    updateBoundingbox() {
+        this.boundingbox.transform(this.position, this.angle);
         this.children.forEach(child => {
-            if(!clear) {
-                child.boundingbox.justify(this.boundingbox);
-            }
-            child.updateBoundingbox(clear);
+            child.boundingbox.transform(this.position, this.angle);
+            child.boundingbox.mutiply(this.boundingbox);
+            child.updateBoundingbox();
         })
     }
     includes(point: Vector2d) {
-        /* point.transfrom(this.boundingbox);
-        return super.includes(point) */
-        return this.boundingbox.includes(point, this.w, this.h);
+        let x = point.x*this.boundingbox.a00+point.y*this.boundingbox.a10+this.boundingbox.a20;
+        let y = point.x*this.boundingbox.a01+point.y*this.boundingbox.a11+this.boundingbox.a21;
+        return x > 0 && y > 0 && x < this.w && y < this.h;
     }
     attach(child: Renderable) {
         this.children.push(child);
@@ -227,7 +226,6 @@ export class RenderManger extends Touch {
     }
     clear() {
         this.ex.context.clearRect(0, 0, this.ex.canvas.width, this.ex.canvas.height);
-        this.root.updateBoundingbox(true);
         this.root.updateBoundingbox();
     }
     render() {
