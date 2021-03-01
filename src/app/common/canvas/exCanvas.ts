@@ -148,11 +148,18 @@ class Renderable extends Rect2d {
     draw(ex: ExCanvasRenderingContext2D) {
 
     }
+    initBoundingbox(parent: Rect2d){
+        this.boundingbox.clear();
+        if(parent){
+            this.boundingbox.translate(-parent.position.x, -parent.position.y);
+        }
+        this.boundingbox.rotate(-this.angle);
+        this.boundingbox.translate(-this.position.x, -this.position.y);
+        
+    }
     updateBoundingbox() {
-        this.boundingbox.transform(this.position, this.angle);
         this.children.forEach(child => {
-            child.boundingbox.transform(this.position, this.angle);
-            child.boundingbox.mutiply(this.boundingbox);
+            child.initBoundingbox(this);
             child.updateBoundingbox();
         })
     }
@@ -226,6 +233,7 @@ export class RenderManger extends Touch {
     }
     clear() {
         this.ex.context.clearRect(0, 0, this.ex.canvas.width, this.ex.canvas.height);
+        this.root.initBoundingbox(null)
         this.root.updateBoundingbox();
     }
     render() {

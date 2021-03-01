@@ -114,6 +114,11 @@ export class Vector2d implements IVector2d{
         this.y = this.x*m.a01+this.y*m.a11+m.a21;
         return this;
     }
+    negative(){
+        this.x = - this.x;
+        this.y = - this.y;
+        return this;
+    }
 }
 export class Rect2d {
     angle = 0;
@@ -162,17 +167,30 @@ export class Matrix{
         this.a00 = 1, this.a11 = 1, this.a22 = 1;
         return this;
     }
-    transform(v: Vector2d, angle: number) {
+    rotate(angle: number) {
         let sin = Math.sin(angle), cos = Math.cos(angle);
-        this.a00 = cos, this.a01 = -sin, this.a02 = 0;
-        this.a10 = sin, this.a11 = cos, this.a12 = 0;
-        this.a20 = v.x, this.a21 = v.y, this.a22 = 0;
+        this.a00 = this.a00*cos+this.a01*sin; this.a01 = -this.a00*sin+this.a01*cos;
+        this.a10 = this.a10*cos+this.a11*sin; this.a11 = -this.a10*sin+this.a11*cos;
+        this.a20 = this.a20*cos+this.a21*sin; this.a21 = -this.a20*sin+this.a21*cos;
+        return this;
+    }
+    translate(x: number, y: number) {
+        this.a00 = this.a00+this.a02*x; this.a01 = this.a01+this.a02*y;
+        this.a10 = this.a10+this.a12*x; this.a11 = this.a11+this.a12*y;
+        this.a20 = this.a20+this.a22*x; this.a21 = this.a21+this.a22*y;
+        return this;
+    }
+    tranform(x: number, y: number, angle: number) {
+        let sin = Math.sin(angle), cos = Math.cos(angle);
+        this.a00 = this.a00*m.a00+this.a01*m.a10+this.a02*m.a20, this.a01 = this.a00*m.a01+this.a01*m.a11+this.a02*m.a21, this.a02 = this.a00*m.a02+this.a01*m.a12+this.a02*m.a22;
+        this.a10 = this.a10*m.a00+this.a11*m.a10+this.a12*m.a20, this.a11 = this.a10*m.a01+this.a11*m.a11+this.a12*m.a21, this.a12 = this.a10*m.a02+this.a11*m.a12+this.a12*m.a22;
+        this.a20 = this.a20*m.a00+this.a21*m.a10+this.a22*m.a20, this.a21 = this.a20*m.a01+this.a21*m.a11+this.a22*m.a21, this.a22 = this.a20*m.a02+this.a21*m.a12+this.a22*m.a22;
         return this;
     }
     clear(){
-        this.a00 = 0, this.a01 = 0, this.a02 = 0;
-        this.a10 = 0, this.a11 = 0, this.a12 = 0;
-        this.a20 = 0, this.a21 = 0, this.a22 = 0;
+        this.a00 = 1, this.a01 = 0, this.a02 = 0;
+        this.a10 = 0, this.a11 = 1, this.a12 = 0;
+        this.a20 = 0, this.a21 = 0, this.a22 = 1;
     }
     mutiply(m: Matrix){
         this.a00 = this.a00*m.a00+this.a01*m.a10+this.a02*m.a20, this.a01 = this.a00*m.a01+this.a01*m.a11+this.a02*m.a21, this.a02 = this.a00*m.a02+this.a01*m.a12+this.a02*m.a22;
