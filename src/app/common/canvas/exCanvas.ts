@@ -148,18 +148,16 @@ class Renderable extends Rect2d {
     draw(ex: ExCanvasRenderingContext2D) {
 
     }
-    initBoundingbox(parent: Rect2d){
-        this.boundingbox.clear();
+    initBoundingbox(parent: Matrix){
         if(parent){
-            this.boundingbox.translate(-parent.position.x, -parent.position.y);
+            this.boundingbox.transform(-this.position.x, -this.position.y, this.angle).rightMultiply(parent)
+        }else{
+            this.boundingbox.transform(-this.position.x, -this.position.y, this.angle);
         }
-        this.boundingbox.rotate(-this.angle);
-        this.boundingbox.translate(-this.position.x, -this.position.y);
-        
     }
     updateBoundingbox() {
         this.children.forEach(child => {
-            child.initBoundingbox(this);
+            child.initBoundingbox(this.boundingbox);
             child.updateBoundingbox();
         })
     }
@@ -304,11 +302,15 @@ class StickBorder extends Border implements TouchHandler{
         padding : 4,
         scale : new Solid(),
         rotate : new Circle(),
+        activeColor: '#87ceeb',
+        inactiveColor: '#cacaca'
     }
 
     isFocus = false;
     isScale = false;
     isRotate = false;
+
+    static selected: StickBorder = null;
     
     constructor() {
         super();
@@ -319,6 +321,17 @@ class StickBorder extends Border implements TouchHandler{
         this.isFocus = this.includes(touch);
         this.isScale = this.stick.scale.includes(touch);
         this.isRotate = this.stick.rotate.includes(touch);
+
+        if(this.isFocus || this.isScale || this.isRotate){
+            StickBorder.selected = this;
+            this.borderColor = this.stick.activeColor;
+            this.stick.scale.color = this.stick.activeColor;
+            this.stick.rotate.color = this.stick.activeColor;
+        }else {
+            this.borderColor = this.stick.inactiveColor;
+            this.stick.scale.color = this.stick.inactiveColor;
+            this.stick.rotate.color = this.stick.inactiveColor;
+        }
     }
     move(offset: Vector2d) {
         if(this.isFocus && !this.isScale && !this.isRotate){
@@ -357,7 +370,7 @@ export class StickText extends StickBorder implements KeyHandler {
     str = '';
 
     layoutStr(ex: ExCanvasRenderingContext2D) {
-        let x = this.padding, y = this.padding, fontSize = null;
+        let x = this.padding, y = this.padding + ex.dummyfont.height, fontSize = null;
         for(let i = 0 ; i < this.str.length ; i ++) {
             fontSize = ex.measureText(this.str[i]);
             if(this.str[i] == '\n' || x + fontSize.width + this.padding > this.w) {
@@ -369,7 +382,7 @@ export class StickText extends StickBorder implements KeyHandler {
             ex.fillText(this.str[i], x, y);
         }
         this.scaleTo(
-            Math.max(y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding, this.w), 
+            Math.max(x + (fontSize ? fontSize.width : ex.dummyfont.width) + this.padding, this.w), 
             Math.max(y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding, this.h), 
         );
     }
