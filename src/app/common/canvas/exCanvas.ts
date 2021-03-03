@@ -373,18 +373,21 @@ export class StickText extends StickBorder implements KeyHandler {
         let x = this.padding, y = this.padding + ex.dummyfont.height, fontSize = null;
         for(let i = 0 ; i < this.str.length ; i ++) {
             fontSize = ex.measureText(this.str[i]);
-            if(this.str[i] == '\n' || x + fontSize.width + this.padding > this.w) {
+            if (this.str[i] == '\n' || x + fontSize.width + this.padding > this.w) {
                 x = this.padding;
                 y += (fontSize.height || ex.dummyfont.height) + this.padding;
-            }else {
-                x += fontSize.width;
             }
             ex.fillText(this.str[i], x, y);
+            console.log(x, y, this.str[i], fontSize.width)
+            x += fontSize.width;
         }
-        this.scaleTo(
-            Math.max(x + (fontSize ? fontSize.width : ex.dummyfont.width) + this.padding, this.w), 
-            Math.max(y + (fontSize ? fontSize.height : ex.dummyfont.height) + this.padding, this.h), 
-        );
+        if(!this.isScale) {
+            this.scaleTo(
+                Math.max(x + (fontSize ? fontSize.width : ex.dummyfont.width) + this.padding, this.w), 
+                Math.max(y + this.padding, this.h), 
+            );
+        }
+        
     }
     draw(ex: ExCanvasRenderingContext2D) {
         ex.context.font = this.font;
