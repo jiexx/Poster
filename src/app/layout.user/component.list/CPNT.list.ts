@@ -59,7 +59,7 @@ export class CList implements OnInit {
     detail(item){
         const mode = this.route.snapshot.queryParamMap.get('mode');
         if(mode == 'editable'){
-            this.router.navigate(['/user/input'], {queryParams: {userid: item.id, mode: 'input'}})
+            this.router.navigate(['/user/edit'], {queryParams: {userid: item.id, mode: 'input'}})
         }else if(mode == 'readonly'){
             this.router.navigate(['/user/detail'], {queryParams: {
                 userid: item.id, mode: 'confirm', 

@@ -20,7 +20,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle'
 import { CList } from './component.list/CPNT.list';
 import { CDetail } from './component.detail/CPNT.detail';
-import { CInput } from './component.input/CPNT.input';
+import { CEdit } from './component.edit/CPNT.edit';
 import { CanvasModule } from 'app/common/canvas/canvas.module';
 
 @NgModule({
@@ -50,7 +50,7 @@ import { CanvasModule } from 'app/common/canvas/canvas.module';
         CLogin,
         CList,
         CDetail,
-        CInput
+        CEdit
     ],
     
     

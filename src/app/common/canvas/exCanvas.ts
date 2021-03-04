@@ -166,8 +166,19 @@ class Renderable extends Rect2d {
         let y = point.x*this.boundingbox.a01+point.y*this.boundingbox.a11+this.boundingbox.a21;
         return x > 0 && y > 0 && x < this.w && y < this.h;
     }
-    attach(child: Renderable) {
-        this.children.push(child);
+    attach(child: Renderable, index = -1) {
+        if(index >= 0)  {
+            this.children.splice(index, 0, child);
+        }else { 
+            this.children.push(child);
+        }
+    }
+    remove(child: Renderable, index = -1) {
+        if(index >= 0)  {
+            this.children.splice(index, 1);
+        }else { 
+            this.children.splice(this.children.findIndex(c => c==child),1);
+        }
     }
 }
 interface TouchHandler{
@@ -225,6 +236,7 @@ class Touch extends Dispatcher{
     }
 }
 export class RenderManger extends Touch {
+    static selected: Renderable = null;
     root = new Renderable();
     constructor(private ex: ExCanvasRenderingContext2D){
         super();
@@ -260,9 +272,23 @@ export class RenderManger extends Touch {
     debug = 1;
     createText(){
         this.clear();
-        if(this.debug == 1) {
-            this.root.attach(new StickText());
-            this.debug = 2;
+        this.root.attach(new StickText());
+    }
+    removeText(){
+        this.clear();
+        if(RenderManger.selected) {
+            this.root.remove(RenderManger.selected);
+            RenderManger.selected = null;
+        }
+    }
+    createBackgroundImage(){
+        this.clear();
+        this.root.attach(new BackgroundImage(), 0);
+    }
+    removeBackgroundImage(){
+        this.clear();
+        if(this.root.children[0]['image']) {
+            this.root.remove(null, 0);
         }
     }
 }
@@ -297,6 +323,19 @@ class Border extends Renderable {
         ex.stroke();
     }
 }
+
+class BackgroundImage extends Renderable {
+    image = new Image();
+    src = null;
+    draw(ex: ExCanvasRenderingContext2D){
+        if(this.src) {
+            this.image.onload = () => {
+                ex.context.drawImage(this.image, 0, 0);
+            };
+            this.image.src = this.src
+        }
+    }
+}
 class StickBorder extends Border implements TouchHandler{
     stick = {
         padding : 4,
@@ -309,8 +348,6 @@ class StickBorder extends Border implements TouchHandler{
     isFocus = false;
     isScale = false;
     isRotate = false;
-
-    static selected: StickBorder = null;
     
     constructor() {
         super();
@@ -323,7 +360,7 @@ class StickBorder extends Border implements TouchHandler{
         this.isRotate = this.stick.rotate.includes(touch);
 
         if(this.isFocus || this.isScale || this.isRotate){
-            StickBorder.selected = this;
+            RenderManger.selected = this;
             this.borderColor = this.stick.activeColor;
             this.stick.scale.color = this.stick.activeColor;
             this.stick.rotate.color = this.stick.activeColor;

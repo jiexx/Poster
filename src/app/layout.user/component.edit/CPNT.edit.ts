@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { UserService } from 'app/common/data/user';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BusService, Bus } from 'app/common/bus/bus';
 import { Location } from '@angular/common';
 import { FormControl, FormGroup } from '@angular/forms';
+import { CCanvas } from 'app/common/canvas/CPNT.canvas';
 
 const codeValidator = (control: FormControl):{[key:string]: boolean | string} =>{
     if(!control.value) {
@@ -12,16 +13,16 @@ const codeValidator = (control: FormControl):{[key:string]: boolean | string} =>
 }
 
 @Component({
-    templateUrl: './CPNT.input.html',
-    styleUrls: ['./CPNT.input.css'],
+    templateUrl: './CPNT.edit.html',
+    styleUrls: ['./CPNT.edit.css'],
 })
-export class CInput extends Bus  implements OnInit {
+export class CEdit extends Bus  implements OnInit {
     name(): string {
         return 'CInput';
     }
     ngOnInit(): void {
-        this.popup = null;
-        this.check = null;
+        this.config = null;
+        this.inspect = null;
     }
     mobile = new FormControl('xx', [
         codeValidator
@@ -31,45 +32,48 @@ export class CInput extends Bus  implements OnInit {
     ]);
     isModInc = new FormControl(true, [
     ]);
-    formPopup: FormGroup = new FormGroup({
+
+    config = null;
+    formConfig: FormGroup = new FormGroup({
         mobile: this.mobile,
         code: this.code,
         isModInc: this.isModInc
     });
+    inspect = null;
+    formInspect: FormGroup = new FormGroup({
+    });
     
+    
+    @ViewChild(CCanvas) editor: CCanvas;
     constructor(private location: Location, protected bus: BusService){
         super(bus);
     }
-    popup = null;
-    save(){
-        this.popup = {};
+    
+    configDone(){
+        this.config = {};
     }
-    open(){
+    configBackgroundImage(){
 
     }
-    edit(){
+    configText(){
 
     }
-    formCheck: FormGroup = new FormGroup({
-    });
-    check = null;
-    checkin(){
-        this.check = {};
+
+    configInspectin(){
+        this.inspect = {};
     }
-    checkout(){
+    configInspectout(){
         
     }
-    append() {
-        this.formCheck.addControl(Math.ceil(Math.random()*10000)+'', new FormControl('', [
+    inspectAppend() {
+        this.formInspect.addControl(Math.ceil(Math.random()*10000)+'', new FormControl('', [
             codeValidator
         ]))
     }
-    remove(key){
-        this.formCheck.removeControl(key);
+    inspectRemove(key){
+        this.formInspect.removeControl(key);
     }
-    rePopup(){
-        this.popup = {};
-    }
+    
     today(){
         return new Date().toLocaleDateString()
     }

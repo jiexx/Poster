@@ -167,7 +167,7 @@ class Texts {
 }
 
 @Component({
-    selector: 'canvasr',
+    selector: 'canvas-editor',
     template:
         `<div #container></div>`,
     styles: [
@@ -183,6 +183,9 @@ export class CCanvas implements OnChanges, AfterViewInit  {
     public mgr: RenderManger;
     constructor() {
 
+    }
+    createText(){
+        this.mgr.createText();
     }
     ngOnChanges() {
     } 
@@ -204,7 +207,6 @@ export class CCanvas implements OnChanges, AfterViewInit  {
     @HostListener('touchstart', ['$event'])
     @HostListener('mousedown', ['$event'])
     onMousedown(event) {
-        this.mgr.createText();
         this.mgr.onDown(event);
         this.textarea.focus();
     }
