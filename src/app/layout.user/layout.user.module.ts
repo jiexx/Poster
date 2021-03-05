@@ -17,7 +17,8 @@ import { SheetModule } from 'app/common/sheet/sheet.module';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle'
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSliderModule } from '@angular/material/slider'
 import { CList } from './component.list/CPNT.list';
 import { CDetail } from './component.detail/CPNT.detail';
 import { CEdit } from './component.edit/CPNT.edit';
@@ -39,6 +40,7 @@ import { CanvasModule } from 'app/common/canvas/canvas.module';
         MatCardModule,
         MatToolbarModule,
         MatSelectModule,
+        MatSliderModule,
         MatDividerModule,
         MatSlideToggleModule,
         DialogModule,

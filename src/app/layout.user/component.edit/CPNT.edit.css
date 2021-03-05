@@ -17,3 +17,6 @@ mat-toolbar {
     height: 1.125em !important;
     font-size: 22px !important;
 }
+mat-slider {
+    width: 100%;
+}

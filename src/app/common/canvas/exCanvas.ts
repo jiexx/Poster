@@ -1,5 +1,8 @@
 import { THIS_EXPR } from "@angular/compiler/src/output/output_ast";
+import { Injector } from "@angular/core";
 import { sample, timestamp } from "rxjs/operators";
+import { Bus, BusService, IBusMessage } from "../bus/bus";
+import { IDialogMessage } from "../dialog/ITF.dialog";
 import { Matrix, Rect2d, Vector2d } from "../projection";
 
 export class ExCanvasRenderingContext2D {
@@ -272,23 +275,45 @@ export class RenderManger extends Touch {
     debug = 1;
     createText(){
         this.clear();
-        this.root.attach(new StickText());
+        let st = new StickText();
+        this.root.attach(st);
+        st.isFocus = true;
+        RenderManger.selected = st;
+        this.render();
     }
     removeText(){
         this.clear();
         if(RenderManger.selected) {
             this.root.remove(RenderManger.selected);
             RenderManger.selected = null;
+            this.render();
+        }
+    }
+    changeFont(font: string){
+        this.clear();
+        if(RenderManger.selected && RenderManger.selected.hasOwnProperty('font')) {
+            RenderManger.selected['font'] = font;
+            this.ex.dummyfont = this.ex.measureText('|');
+            this.render();
+        }
+    }
+    changeStr(str: string){
+        this.clear();
+        if(RenderManger.selected && RenderManger.selected.hasOwnProperty('str')) {
+            RenderManger.selected['str'] = str;
+            this.render();
         }
     }
     createBackgroundImage(){
         this.clear();
         this.root.attach(new BackgroundImage(), 0);
+        this.render();
     }
     removeBackgroundImage(){
         this.clear();
         if(this.root.children[0]['image']) {
             this.root.remove(null, 0);
+            this.render();
         }
     }
 }
@@ -336,6 +361,14 @@ class BackgroundImage extends Renderable {
         }
     }
 }
+class StickBorderBus extends Bus {
+    name(): string {
+        return 'StickBorderBus';
+    }
+    constructor(public bus: BusService){
+        super(bus)
+    }
+}
 class StickBorder extends Border implements TouchHandler{
     stick = {
         padding : 4,
@@ -349,10 +382,17 @@ class StickBorder extends Border implements TouchHandler{
     isScale = false;
     isRotate = false;
     
+    bus;
     constructor() {
         super();
         this.attach(this.stick.scale);
         this.attach(this.stick.rotate);
+        const injector = Injector.create({ 
+            providers: [ 
+                { provide: BusService },
+            ]
+        });
+        this.bus = injector.get(BusService);
     }
     down(touch: Vector2d) {
         this.isFocus = this.includes(touch);
@@ -360,7 +400,10 @@ class StickBorder extends Border implements TouchHandler{
         this.isRotate = this.stick.rotate.includes(touch);
 
         if(this.isFocus || this.isScale || this.isRotate){
-            RenderManger.selected = this;
+            if(RenderManger.selected != this){
+                RenderManger.selected = this;
+                this.bus.send('CEdit', <IBusMessage>{command: 'configTextChange', data: {} })
+            }
             this.borderColor = this.stick.activeColor;
             this.stick.scale.color = this.stick.activeColor;
             this.stick.rotate.color = this.stick.activeColor;

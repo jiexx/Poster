@@ -1,12 +1,12 @@
 <div fxLayout="column" fxLayoutAlign="start stretch" fxFill>
     <nav fxFlex="none" mat-tab-nav-bar backgroundColor="primary">
-        <a mat-tab-link (click)="save()">
+        <a mat-tab-link (click)="configDone()">
             <mat-icon>save</mat-icon>
         </a>
-        <a mat-tab-link (click)="background()">
+        <a mat-tab-link (click)="configBackgroundImage()">
             <mat-icon>download</mat-icon>
         </a>
-        <a mat-tab-link (click)="text()">
+        <a mat-tab-link (click)="configText()">
             <mat-icon>text_fields</mat-icon>
         </a>
         <div fxFlex></div>
@@ -16,6 +16,26 @@
     </nav>
     <canvas-editor fxFlex="grow"></canvas-editor>
 </div>
+<sheet [data]="text">
+    <form [formGroup]="formText" style="width:100%" sheet-item>
+        <mat-form-field>
+            <mat-label>字体风格</mat-label>
+            <mat-select [formControl]="font">
+                <mat-option *ngFor="let font of fonts; let i = index" [value]="font">
+                  {{font.family}} {{font.style}} {{font.weight}} {{font.variant}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-slider thumbLabel tickInterval="1000" min="6" max="128" [formControl]="size"></mat-slider>
+        <mat-form-field>
+            <mat-label>内容</mat-label>
+            <textarea matInput type="text" [formControl]="str"></textarea>
+            <mat-error *ngIf="str.hasError('invalid')">{{str.errors.msg}}</mat-error>
+        </mat-form-field>
+        <button mat-stroked-button color="accent" (click)="textRemove()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">delete_forever</mat-icon><div fxFlex>删除</div></div></button>
+        <br><br>
+    </form>
+</sheet>
 <sheet [data]="config">
     <form [formGroup]="formConfig" style="width:100%" sheet-item>
         <mat-form-field>
@@ -50,24 +70,11 @@
         <mat-form-field *ngFor="let ctrl of formInspect.controls | keyvalue; let i=index">
             <input matInput  type="tel" placeholder="检票字段{{i}}" [formControl]="formInspect.controls[ctrl.key]">
             <mat-icon matPrefix color="accent">filter_{{i > 9 ? '9_plus' : i }}</mat-icon>
-            <button mat-icon-button matSuffix class="title-icon-suffix" (click)="remove(ctrl.key)"><mat-icon  color="accent">delete_forever</mat-icon></button>
+            <button mat-icon-button matSuffix class="title-icon-suffix" (click)="inspectRemove(ctrl.key)"><mat-icon  color="accent">delete_forever</mat-icon></button>
             <mat-error *ngIf="formInspect.controls[ctrl.key].hasError('invalid')">{{formInspect.controls[ctrl.key].errors.msg}}</mat-error>
         </mat-form-field >
-        <button mat-stroked-button color="accent" (click)="append()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">add</mat-icon><div fxFlex>增加</div></div></button>
+        <button mat-stroked-button color="accent" (click)="inspectAppend()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">add</mat-icon><div fxFlex>增加</div></div></button>
         <button mat-flat-button color="accent" (click)="configDone()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">arrow_back_ios</mat-icon><div fxFlex>返回</div></div></button>
-        <br><br>
-    </form>
-</sheet>
-<sheet [data]="text">
-    <form [formGroup]="formInspect" style="width:100%" sheet-item>
-        <mat-form-field *ngFor="let ctrl of formInspect.controls | keyvalue; let i=index">
-            <input matInput  type="tel" placeholder="检票字段{{i}}" [formControl]="formInspect.controls[ctrl.key]">
-            <mat-icon matPrefix color="accent">filter_{{i > 9 ? '9_plus' : i }}</mat-icon>
-            <button mat-icon-button matSuffix class="title-icon-suffix" (click)="remove(ctrl.key)"><mat-icon  color="accent">delete_forever</mat-icon></button>
-            <mat-error *ngIf="formInspect.controls[ctrl.key].hasError('invalid')">{{formInspect.controls[ctrl.key].errors.msg}}</mat-error>
-        </mat-form-field >
-        <button mat-stroked-button color="accent" (click)="append()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">add</mat-icon><div fxFlex>增加</div></div></button>
-        <button mat-flat-button color="accent" (click)="configPopup()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">arrow_back_ios</mat-icon><div fxFlex>返回</div></div></button>
         <br><br>
     </form>
 </sheet>

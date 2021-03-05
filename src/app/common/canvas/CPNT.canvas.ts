@@ -187,13 +187,28 @@ export class CCanvas implements OnChanges, AfterViewInit  {
     createText(){
         this.mgr.createText();
     }
+    removeText(){
+        this.mgr.removeText();
+    }
+    changeFont(font: string){
+        this.mgr.changeFont(font);
+    }
+    changeStr(str: string){
+        this.mgr.changeStr(str);
+    }
+    mode = 'inside'
+    setEditMode(mode:'inside'|'outside'){
+        this.mode = mode;
+    }
     ngOnChanges() {
     } 
     ngAfterViewInit() {
         //this.text = new Text(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
         this.mgr = new RenderManger(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
         this.mgr.root.translate(50,100);
-        this.initHiddenTextarea();
+        if(this.mode == 'inside') {
+            this.initHiddenTextarea();
+        }
     }
     @HostListener('touchend')
     @HostListener('mouseup')
@@ -208,11 +223,15 @@ export class CCanvas implements OnChanges, AfterViewInit  {
     @HostListener('mousedown', ['$event'])
     onMousedown(event) {
         this.mgr.onDown(event);
-        this.textarea.focus();
+        if(this.mode == 'inside') {
+            this.textarea.focus();
+        }
     }
     @HostListener('window:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
-        this.textarea.focus();
+        if(this.mode == 'inside') {
+            this.textarea.focus();
+        }
     }
     @HostListener('click', ['$event']) 
     onClick(event) {
