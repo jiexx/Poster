@@ -1,5 +1,6 @@
 import { AfterViewInit } from '@angular/core';
 import { Component, OnChanges, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Bus, BusService, IBusMessage } from '../bus/bus';
 import { ExCanvasRenderingContext2D, RenderManger } from './exCanvas';
 
 
@@ -178,11 +179,14 @@ class Texts {
         }`
     ]
 })
-export class CCanvas implements OnChanges, AfterViewInit  {
+export class CCanvas extends Bus implements OnChanges, AfterViewInit  {
+    name(): string {
+        return 'CCanvas';
+    }
     @ViewChild('container') container: ElementRef<HTMLElement>;
     public mgr: RenderManger;
-    constructor() {
-
+    constructor(protected bus: BusService) {
+        super(bus);
     }
     createText(){
         this.mgr.createText();
@@ -210,6 +214,9 @@ export class CCanvas implements OnChanges, AfterViewInit  {
             this.initHiddenTextarea();
         }
     }
+    callback(){
+        this.bus.send('CEdit', <IBusMessage>{command: 'configTextChange', data: true });
+    }
     @HostListener('touchend')
     @HostListener('mouseup')
     onMouseup() {
@@ -222,22 +229,26 @@ export class CCanvas implements OnChanges, AfterViewInit  {
     @HostListener('touchstart', ['$event'])
     @HostListener('mousedown', ['$event'])
     onMousedown(event) {
+        event['onResult'] = this.callback.bind(this);
         this.mgr.onDown(event);
         if(this.mode == 'inside') {
             this.textarea.focus();
         }
+        event.preventDefault();
     }
     @HostListener('window:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
         if(this.mode == 'inside') {
             this.textarea.focus();
         }
+        event.preventDefault();
     }
     @HostListener('click', ['$event']) 
     onClick(event) {
         if (event.target) {
             event.target.focus();
             event.target.click();
+            event.preventDefault();
         }
     }
     private textarea: HTMLTextAreaElement = null;

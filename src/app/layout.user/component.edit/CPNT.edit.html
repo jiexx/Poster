@@ -16,6 +16,18 @@
     </nav>
     <canvas-editor fxFlex="grow"></canvas-editor>
 </div>
+<sheet [data]="backgroundImage">
+    <form [formGroup]="formText" style="width:100%" sheet-item>
+        <div style="max-height:50vh">
+            <img src="./assets/img/Homepage-1.jpg" style="width:50%">
+            <img src="./assets/img/Homepage-2.jpg" style="width:50%">
+            <img src="./assets/img/Homepage-3.jpg" style="width:50%">
+            <img src="./assets/img/Homepage-4.jpg" style="width:50%">
+            <button mat-stroked-button color="accent" (click)="backgroundImageRemove()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">delete_forever</mat-icon><div fxFlex>删除</div></div></button>
+        </div>
+        <br><br>
+    </form>
+</sheet>
 <sheet [data]="text">
     <form [formGroup]="formText" style="width:100%" sheet-item>
         <mat-form-field>

@@ -37,7 +37,6 @@ export class CSheet implements OnChanges {
     open(data: DData): void {
         const bottomSheetRef = this.bottomsheet.open(CContainer, {data: {ref: this.item.ref, appendix: data}});
         bottomSheetRef.afterDismissed().subscribe(() => {
-            console.log('dataFromChild');
             this.data = null;
         });
     }

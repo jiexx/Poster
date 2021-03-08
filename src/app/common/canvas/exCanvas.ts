@@ -1,8 +1,3 @@
-import { THIS_EXPR } from "@angular/compiler/src/output/output_ast";
-import { Injector } from "@angular/core";
-import { sample, timestamp } from "rxjs/operators";
-import { Bus, BusService, IBusMessage } from "../bus/bus";
-import { IDialogMessage } from "../dialog/ITF.dialog";
 import { Matrix, Rect2d, Vector2d } from "../projection";
 
 export class ExCanvasRenderingContext2D {
@@ -221,6 +216,9 @@ class Touch extends Dispatcher{
     onDown(root: Renderable, event) {
         this.point.x = this.offset.x = this.X(event);
         this.point.y = this.offset.y = this.Y(event);
+        if(event['onResult']){
+            this.point['onResult'] = event['onResult'];
+        }
         this.dispatch(root, 'down', this.point);
     }
     onMove(root: Renderable, event) {
@@ -293,7 +291,8 @@ export class RenderManger extends Touch {
         this.clear();
         if(RenderManger.selected && RenderManger.selected.hasOwnProperty('font')) {
             RenderManger.selected['font'] = font;
-            this.ex.dummyfont = this.ex.measureText('|');
+            // this.ex.context.font = font;
+            // this.ex.dummyfont = this.ex.measureText('|');
             this.render();
         }
     }
@@ -361,56 +360,47 @@ class BackgroundImage extends Renderable {
         }
     }
 }
-class StickBorderBus extends Bus {
-    name(): string {
-        return 'StickBorderBus';
-    }
-    constructor(public bus: BusService){
-        super(bus)
-    }
-}
 class StickBorder extends Border implements TouchHandler{
     stick = {
         padding : 4,
+        config : new Solid(),
         scale : new Solid(),
         rotate : new Circle(),
         activeColor: '#87ceeb',
         inactiveColor: '#cacaca'
     }
-
+    isConfig = false;
     isFocus = false;
     isScale = false;
     isRotate = false;
-    
-    bus;
+
     constructor() {
         super();
+        this.attach(this.stick.config);
         this.attach(this.stick.scale);
         this.attach(this.stick.rotate);
-        const injector = Injector.create({ 
-            providers: [ 
-                { provide: BusService },
-            ]
-        });
-        this.bus = injector.get(BusService);
     }
     down(touch: Vector2d) {
+        this.isConfig = this.stick.config.includes(touch)
         this.isFocus = this.includes(touch);
         this.isScale = this.stick.scale.includes(touch);
         this.isRotate = this.stick.rotate.includes(touch);
 
-        if(this.isFocus || this.isScale || this.isRotate){
-            if(RenderManger.selected != this){
-                RenderManger.selected = this;
-                this.bus.send('CEdit', <IBusMessage>{command: 'configTextChange', data: {} })
-            }
+        if(this.isFocus || this.isScale || this.isRotate || this.isConfig){
+            RenderManger.selected = this;
             this.borderColor = this.stick.activeColor;
+            this.stick.config.color = this.stick.activeColor;
             this.stick.scale.color = this.stick.activeColor;
             this.stick.rotate.color = this.stick.activeColor;
         }else {
             this.borderColor = this.stick.inactiveColor;
+            this.stick.config.color = this.stick.inactiveColor;
             this.stick.scale.color = this.stick.inactiveColor;
             this.stick.rotate.color = this.stick.inactiveColor;
+        }
+
+        if(this.isConfig && touch['onResult']) {
+            touch['onResult']();
         }
     }
     move(offset: Vector2d) {
@@ -432,11 +422,13 @@ class StickBorder extends Border implements TouchHandler{
     }
     scale(w, h){
         super.scale(w, h);
+        this.stick.config.reset(- this.stick.padding, - this.stick.padding, this.stick.padding*2,  this.stick.padding*2);
         this.stick.rotate.reset(this.w - this.stick.padding, - this.stick.padding, this.stick.padding*2,  this.stick.padding*2);
         this.stick.scale.reset(this.w - this.stick.padding, this.h - this.stick.padding, this.stick.padding*2, this.stick.padding*2);
     }
     scaleTo(w, h){
         super.scaleTo(w, h);
+        this.stick.config.reset(- this.stick.padding, - this.stick.padding, this.stick.padding*2,  this.stick.padding*2);
         this.stick.rotate.reset(this.w - this.stick.padding, - this.stick.padding, this.stick.padding*2,  this.stick.padding*2);
         this.stick.scale.reset(this.w - this.stick.padding, this.h - this.stick.padding, this.stick.padding*2, this.stick.padding*2);
     }
@@ -449,25 +441,37 @@ export class StickText extends StickBorder implements KeyHandler {
     focusIndex = 0;
     str = '';
 
+    limitWidth = 5;
     layoutStr(ex: ExCanvasRenderingContext2D) {
-        let x = this.padding, y = this.padding + ex.dummyfont.height, fontSize = null;
+        ex.dummyfont = ex.measureText('|');
+        let x = this.padding, y = this.padding + ex.dummyfont.height, fontSize = null, maxw = x;
+        if(this.isScale && this.limitWidth > 0) {
+            this.limitWidth = -1;
+        }
         for(let i = 0 ; i < this.str.length ; i ++) {
             fontSize = ex.measureText(this.str[i]);
-            if (this.str[i] == '\n' || x + fontSize.width + this.padding > this.w) {
+            if ((this.limitWidth > 0 && i > 0 && i % this.limitWidth == 0) || this.str[i] == '\n' || (this.limitWidth < 0 && (x + fontSize.width + this.padding > this.w))) {
                 x = this.padding;
                 y += (fontSize.height || ex.dummyfont.height) + this.padding;
             }
             ex.fillText(this.str[i], x, y);
             console.log(x, y, this.str[i], fontSize.width)
             x += fontSize.width;
+            if(x > maxw){
+                maxw = x;
+            }
         }
-        if(!this.isScale) {
+        if(this.limitWidth < 0){
             this.scaleTo(
-                Math.max(x + (fontSize ? fontSize.width : ex.dummyfont.width) + this.padding, this.w), 
+                Math.max(maxw + this.padding, this.w),
                 Math.max(y + this.padding, this.h), 
             );
+        }else {
+            this.scaleTo(
+                maxw + this.padding,
+                y + this.padding, 
+            );
         }
-        
     }
     draw(ex: ExCanvasRenderingContext2D) {
         ex.context.font = this.font;
