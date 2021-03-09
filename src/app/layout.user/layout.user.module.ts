@@ -23,6 +23,8 @@ import { CList } from './component.list/CPNT.list';
 import { CDetail } from './component.detail/CPNT.detail';
 import { CEdit } from './component.edit/CPNT.edit';
 import { CanvasModule } from 'app/common/canvas/canvas.module';
+import { CarouselModule } from 'app/common/carousel/carousel.module';
+import { ColorPickerModule } from 'app/common/picker/picker.module';
 
 @NgModule({
     imports: [
@@ -43,6 +45,8 @@ import { CanvasModule } from 'app/common/canvas/canvas.module';
         MatSliderModule,
         MatDividerModule,
         MatSlideToggleModule,
+        CarouselModule,
+        ColorPickerModule,
         DialogModule,
         SheetModule,
         CanvasModule

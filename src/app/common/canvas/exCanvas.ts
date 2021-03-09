@@ -303,10 +303,20 @@ export class RenderManger extends Touch {
             this.render();
         }
     }
-    createBackgroundImage(){
+    createBackgroundImage(src){
         this.clear();
-        this.root.attach(new BackgroundImage(), 0);
-        this.render();
+        if(this.root.children[0] && this.root.children[0]['image']) {
+            let bg = this.root.children[0] as BackgroundImage;
+            bg.load(src, ()=>{
+                this.render();
+            });
+        }else {
+            let bg = new BackgroundImage();
+            this.root.attach(bg, 0);
+            bg.load(src, ()=>{
+                this.render();
+            });
+        }
     }
     removeBackgroundImage(){
         this.clear();
@@ -351,12 +361,19 @@ class Border extends Renderable {
 class BackgroundImage extends Renderable {
     image = new Image();
     src = null;
+    load(src, onload = null){
+        this.image.src = src;
+        this.src = src;
+        this.image.onload = () => {
+            if(onload){
+                onload();
+            }
+        };
+    }
     draw(ex: ExCanvasRenderingContext2D){
         if(this.src) {
-            this.image.onload = () => {
-                ex.context.drawImage(this.image, 0, 0);
-            };
-            this.image.src = this.src
+            // 
+            ex.context.drawImage(this.image, 0, 0);
         }
     }
 }
@@ -455,7 +472,7 @@ export class StickText extends StickBorder implements KeyHandler {
                 y += (fontSize.height || ex.dummyfont.height) + this.padding;
             }
             ex.fillText(this.str[i], x, y);
-            console.log(x, y, this.str[i], fontSize.width)
+            //console.log(x, y, this.str[i], fontSize.width)
             x += fontSize.width;
             if(x > maxw){
                 maxw = x;

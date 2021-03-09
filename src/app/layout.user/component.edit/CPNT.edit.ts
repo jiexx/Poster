@@ -56,6 +56,7 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
         size: this.size
     });
     backgroundImage = null;
+    bgImages = [];
 
     @ViewChild(CCanvas) editor: CCanvas;
     constructor(private location: Location, protected bus: BusService) {
@@ -100,6 +101,12 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
     }
     configBackgroundImage() {
         this.backgroundImage = {};
+        this.bgImages = [
+            './assets/img/Homepage-1.jpg',
+            './assets/img/Homepage-2.jpg',
+            './assets/img/Homepage-3.jpg',
+            './assets/img/Homepage-4.jpg',
+        ]
     }
     configText() {
         this.text = {};
@@ -123,8 +130,11 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
     inspectRemove(key) {
         this.formInspect.removeControl(key);
     }
+    backgroundImageCreate(src) {
+        this.editor.createBackgroundImage(src);
+    }
     backgroundImageRemove() {
-        this.editor.removeText();
+        this.editor.removeBackgroundImage();
     }
     textRemove() {
         this.editor.removeText();

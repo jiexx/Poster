@@ -194,6 +194,12 @@ export class CCanvas extends Bus implements OnChanges, AfterViewInit  {
     removeText(){
         this.mgr.removeText();
     }
+    createBackgroundImage(src){
+        this.mgr.createBackgroundImage(src);
+    }
+    removeBackgroundImage(){
+        this.mgr.removeBackgroundImage();
+    }
     changeFont(font: string){
         this.mgr.changeFont(font);
     }
@@ -209,7 +215,7 @@ export class CCanvas extends Bus implements OnChanges, AfterViewInit  {
     ngAfterViewInit() {
         //this.text = new Text(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
         this.mgr = new RenderManger(new ExCanvasRenderingContext2D(this.container.nativeElement, false));
-        this.mgr.root.translate(50,100);
+        this.mgr.root.translate(0,0);
         if(this.mode == 'inside') {
             this.initHiddenTextarea();
         }
@@ -241,14 +247,14 @@ export class CCanvas extends Bus implements OnChanges, AfterViewInit  {
         if(this.mode == 'inside') {
             this.textarea.focus();
         }
-        event.preventDefault();
+        //event.preventDefault();
     }
     @HostListener('click', ['$event']) 
     onClick(event) {
         if (event.target) {
             event.target.focus();
             event.target.click();
-            event.preventDefault();
+            //event.preventDefault();
         }
     }
     private textarea: HTMLTextAreaElement = null;
