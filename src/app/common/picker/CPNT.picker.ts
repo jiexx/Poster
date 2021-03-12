@@ -11,9 +11,9 @@ export class ColorPicker {
     
     colors = [];
     constructor() {
-        for(let i = 0 ; i < 10 ; i ++) {
-            for(let j = 0 ; j < 10 ; j ++) {
-                this.colors.push(this.hslToHex(i*36, 0, j*15))
+        for(let i = 1 ; i < 11 ; i ++) {
+            for(let j = 1 ; j < 11 ; j ++) {
+                this.colors.push(this.hslToHex(j*36, 1, i*15))
             }
         }
     }
