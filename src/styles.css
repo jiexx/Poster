@@ -85,6 +85,24 @@ mat-toolbar::-webkit-scrollbar-thumb {
 .text-grey {
     color: rgba(0, 0, 0, 0.54) !important
 }
+.w100 {
+  width: 100%;
+}
+.w90 {
+  width: 90%;
+}
+.vh33 {
+  height: 33vh;
+}
+.vh10 {
+  height: 10vh;
+}
+.p5 {
+  padding: 5px;
+}
+.m5 {
+  margin: 5px;
+}
 body > div[style*="border-radius: 100%"] {
     opacity: 0 !important; 
     border: none !important;
