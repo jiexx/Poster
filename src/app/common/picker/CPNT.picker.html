@@ -1,4 +1,4 @@
 
 <div fxLayout="row wrap"  fxLayoutWrap="wrap">
-    <div fxFlex="10" *ngFor="let color of colors" [ngStyle]="{'background-color':color, 'padding':'10px'}"></div>
+    <div fxFlex="10" *ngFor="let color of colors" (click)="onClick(color)" [ngStyle]="{'background-color':color, 'padding':'10px'}"></div>
 </div>

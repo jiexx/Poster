@@ -3,8 +3,13 @@ import { IResult, ENetConf } from 'app/common/config';
 import { Injectable, NgModule } from '@angular/core';
 import { EDataPath, _url, _storageurl } from 'app/common/config';
 import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
 
-
+export const nullValidator = (control: FormControl): { [key: string]: boolean | string } => {
+    if (!control.value) {
+        return { invalid: true, msg: '不能为空' };
+    }
+}
 
 interface IRemote {
     postSync( path : EDataPath, param : {} ) : Promise<IResult>;
@@ -158,6 +163,13 @@ export class UserService {
             if(result && result.result && result.result.length > 0){
                 return result.result[0];
             }
+        }       
+        return null;
+    }
+    async post(name){
+        const my = this.myId();
+        if(my && my.id) {
+            
         }       
         return null;
     }

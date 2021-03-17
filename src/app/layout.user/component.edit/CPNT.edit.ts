@@ -1,16 +1,11 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { UserService } from 'app/common/data/user';
-import { Router, ActivatedRoute } from '@angular/router';
+import { nullValidator, UserService } from 'app/common/data/user';
 import { BusService, Bus } from 'app/common/bus/bus';
 import { Location } from '@angular/common';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CCanvas } from 'app/common/canvas/CPNT.canvas';
 
-const codeValidator = (control: FormControl): { [key: string]: boolean | string } => {
-    if (!control.value) {
-        return { invalid: true, msg: '密码不能为空' };
-    }
-}
+
 
 @Component({
     templateUrl: './CPNT.edit.html',
@@ -21,19 +16,27 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
         return 'CEdit';
     }
     
-    mobile = new FormControl('xx', [
-        codeValidator
+    title = new FormControl('xx', [
+        nullValidator
     ]);
-    code = new FormControl('', [
-        codeValidator
+    price = new FormControl('', [
+        nullValidator
+    ]);
+    amount = new FormControl('', [
+        nullValidator
+    ]);
+    checkid = new FormControl('', [
+        nullValidator
     ]);
     isModInc = new FormControl(true, [
     ]);
 
     config = null;
     formConfig: FormGroup = new FormGroup({
-        mobile: this.mobile,
-        code: this.code,
+        title: this.title,
+        price: this.price,
+        amount: this.amount,
+        checkid: this.checkid,
         isModInc: this.isModInc
     });
     inspect = null;
@@ -97,7 +100,13 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
         return arr;
     }
     configDone() {
-        this.config = true;
+        this.config = {};
+    }
+    save() {
+        let layout = this.editor.mgr.save();
+        if(this.formConfig.valid){
+            this.formConfig.getRawValue();
+        }
     }
     configBackgroundImage() {
         this.backgroundImage = {};
@@ -112,19 +121,19 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
         this.text = {};
         this.editor.createText()
     }
-    configTextChange(){
-        this.text = {};
+    configTextColor(color){
+        this.editor.changeColor(color)
     }
 
     configInspectin() {
-        this.inspect = true;
+        this.inspect = {};
     }
     configInspectout() {
 
     }
     inspectAppend() {
         this.formInspect.addControl(Math.ceil(Math.random() * 10000) + '', new FormControl('', [
-            codeValidator
+            nullValidator
         ]))
     }
     inspectRemove(key) {

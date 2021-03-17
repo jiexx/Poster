@@ -44,8 +44,9 @@
             <mat-label>内容</mat-label>
             <textarea matInput type="text" [formControl]="str"></textarea>
             <mat-error *ngIf="str.hasError('invalid')">{{str.errors.msg}}</mat-error>
-        </mat-form-field>xx
-        <color-picker></color-picker>
+        </mat-form-field>
+        <mat-label>色彩</mat-label>
+        <color-picker (onSelect)="configTextColor($event)"></color-picker>
         <button mat-stroked-button color="accent" (click)="textRemove()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">delete_forever</mat-icon><div fxFlex>删除</div></div></button>
         <br><br>
     </form>
@@ -53,28 +54,28 @@
 <sheet [data]="config">
     <form [formGroup]="formConfig" style="width:100%" sheet-item>
         <mat-form-field>
-            <input matInput placeholder="名称" type="tel" [formControl]="mobile">
+            <input matInput placeholder="名称" type="tel" [formControl]="title">
             <mat-icon matPrefix color="accent">priority_high</mat-icon>
-            <mat-error *ngIf="mobile.hasError('invalid')">{{mobile.errors.msg}}</mat-error>
+            <mat-error *ngIf="title.hasError('invalid')">{{title.errors.msg}}</mat-error>
         </mat-form-field >
         <mat-form-field>
-            <input matInput placeholder="价格" type="text" [formControl]="code">
+            <input matInput placeholder="价格" type="text" [formControl]="price">
             <mat-icon matPrefix color="accent">monetization_on</mat-icon>
-            <mat-error *ngIf="code.hasError('invalid')">{{code.errors.msg}}</mat-error>
+            <mat-error *ngIf="price.hasError('invalid')">{{price.errors.msg}}</mat-error>
         </mat-form-field>
         <mat-form-field>
-            <input matInput placeholder="数量" type="text" [formControl]="code">
+            <input matInput placeholder="数量" type="text" [formControl]="amount">
             <mat-icon matPrefix color="accent">score</mat-icon>
-            <mat-error *ngIf="code.hasError('invalid')">{{code.errors.msg}}</mat-error>
+            <mat-error *ngIf="amount.hasError('invalid')">{{amount.errors.msg}}</mat-error>
         </mat-form-field>
         <mat-form-field>
-            <input matInput placeholder="检票ID" type="text" [formControl]="code">
+            <input matInput placeholder="检票ID" type="text" [formControl]="checkid">
             <mat-icon matPrefix color="accent">perm_identity</mat-icon>
-            <mat-error *ngIf="code.hasError('invalid')">{{code.errors.msg}}</mat-error>
+            <mat-error *ngIf="checkid.hasError('invalid')">{{checkid.errors.msg}}</mat-error>
         </mat-form-field>
         <button mat-stroked-button color="accent" (click)="configInspectin()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">playlist_add_check</mat-icon><div fxFlex>检票字段设置</div><mat-icon fxFlex="none">arrow_forward_ios</mat-icon></div></button>
         <button mat-stroked-button color="accent" (click)="configInspectout()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">notification_important</mat-icon><div fxFlex>结票通知设置</div><mat-icon fxFlex="none">arrow_forward_ios</mat-icon></div></button>
-        <button mat-flat-button color="accent"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">done</mat-icon><div fxFlex>完成</div></div></button>
+        <button mat-flat-button color="accent" (click)="save()"><div fxLayout="row" fxLayoutAlign="space-between center"><mat-icon fxFlex="none">done</mat-icon><div fxFlex>完成</div></div></button>
         <mat-slide-toggle [formControl]="isModInc">{{isModInc.value? '结票自动恢复数量' : '结票数量清0'}}</mat-slide-toggle>
         <br><br>
     </form>

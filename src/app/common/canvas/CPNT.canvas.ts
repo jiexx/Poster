@@ -203,6 +203,9 @@ export class CCanvas extends Bus implements OnChanges, AfterViewInit  {
     changeFont(font: string){
         this.mgr.changeFont(font);
     }
+    changeColor(color: string){
+        this.mgr.changeColor(color);
+    }
     changeStr(str: string){
         this.mgr.changeStr(str);
     }

@@ -178,6 +178,23 @@ class Renderable extends Rect2d {
             this.children.splice(this.children.findIndex(c => c==child),1);
         }
     }
+    toJson(){
+        return {
+            name: 'Renderable', 
+            position: this.position, w: this.w, h: this.h, angle: this.angle, 
+            children: this.children.map(e=>e.toJson())
+        };
+    }
+    fromJson(json){
+        if(json.name == 'Renderable') {
+            this.position.copy(json.position);
+            this.w = json.w;
+            this.h = json.h;
+            this.angle = json.angle;
+            this.children = json.children.map(e=>new classes[e.name](e.position.x, e.position.y, e.w, e.h, e.angle).fromJson(e));
+        }
+        return this;
+    }
 }
 interface TouchHandler{
     down(touch: Vector2d); 
@@ -236,96 +253,7 @@ class Touch extends Dispatcher{
         this.dispatch(root, 'key', {key:event.key, str:str});
     }
 }
-export class RenderManger extends Touch {
-    static selected: Renderable = null;
-    root = new Renderable();
-    constructor(private ex: ExCanvasRenderingContext2D){
-        super();
-    }
-    clear() {
-        this.ex.context.clearRect(0, 0, this.ex.canvas.width, this.ex.canvas.height);
-        this.root.initBoundingbox(null)
-        this.root.updateBoundingbox();
-    }
-    render() {
-        this.root.render(this.ex);
-    }
-    onDown(event) {
-        this.clear();
-        super.onDown(this.root, event);
-        this.render();
-    }
-    onMove(event) {
-        this.clear();
-        super.onMove(this.root, event);
-        this.render();
-    }
-    onUp() {
-        this.clear();
-        super.onUp(this.root);
-        this.render()
-    }
-    onKeyborad(event: KeyboardEvent, str) {
-        this.clear();
-        super.onKey(this.root, event, str);
-        this.render();
-    }
-    debug = 1;
-    createText(){
-        this.clear();
-        let st = new StickText();
-        this.root.attach(st);
-        st.isFocus = true;
-        RenderManger.selected = st;
-        this.render();
-    }
-    removeText(){
-        this.clear();
-        if(RenderManger.selected) {
-            this.root.remove(RenderManger.selected);
-            RenderManger.selected = null;
-            this.render();
-        }
-    }
-    changeFont(font: string){
-        this.clear();
-        if(RenderManger.selected && RenderManger.selected.hasOwnProperty('font')) {
-            RenderManger.selected['font'] = font;
-            // this.ex.context.font = font;
-            // this.ex.dummyfont = this.ex.measureText('|');
-            this.render();
-        }
-    }
-    changeStr(str: string){
-        this.clear();
-        if(RenderManger.selected && RenderManger.selected.hasOwnProperty('str')) {
-            RenderManger.selected['str'] = str;
-            this.render();
-        }
-    }
-    createBackgroundImage(src){
-        this.clear();
-        if(this.root.children[0] && this.root.children[0]['image']) {
-            let bg = this.root.children[0] as BackgroundImage;
-            bg.load(src, ()=>{
-                this.render();
-            });
-        }else {
-            let bg = new BackgroundImage();
-            this.root.attach(bg, 0);
-            bg.load(src, ()=>{
-                this.render();
-            });
-        }
-    }
-    removeBackgroundImage(){
-        this.clear();
-        if(this.root.children[0]['image']) {
-            this.root.remove(null, 0);
-            this.render();
-        }
-    }
-}
+
 class Circle extends Renderable {
     color = '#87ceeb';
     draw(ex: ExCanvasRenderingContext2D) {
@@ -338,12 +266,38 @@ class Circle extends Renderable {
         ex.context.strokeStyle = this.color;
         ex.stroke();
     }
+    toJson() {
+        return {
+            name: 'Circle',
+            color: this.color,
+            ...super.toJson(),
+        }
+    }
+    fromJson(json) {
+        if(json.name == 'Circle') {
+            this.color = json.color;
+            return super.fromJson(json);
+        }
+    }
 }
 class Solid extends Renderable {
     color = '#87ceeb';
     draw(ex: ExCanvasRenderingContext2D) {
         ex.context.fillStyle = this.color;
         ex.fillRect(0, 0, this.w, this.h);
+    }
+    toJson() {
+        return {
+            name: 'Solid',
+            color: this.color,
+            ...super.toJson(),
+        }
+    }
+    fromJson(json) {
+        if(json.name == 'Solid') {
+            this.color = json.color;
+            return super.fromJson(json);
+        }
     }
 }
 class Border extends Renderable {
@@ -355,6 +309,21 @@ class Border extends Renderable {
         ex.context.beginPath();
         ex.rect(0.5, 0.5, this.w, this.h);
         ex.stroke();
+    }
+    toJson() {
+        return {
+            name: 'Border',
+            width: this.width,
+            borderColor: this.borderColor,
+            ...super.toJson(),
+        }
+    }
+    fromJson(json) {
+        if(json.name == 'Border') {
+            this.width = json.width;
+            this.borderColor = json.borderColor;
+            return super.fromJson(json);
+        }
     }
 }
 
@@ -374,6 +343,19 @@ class BackgroundImage extends Renderable {
         if(this.src) {
             // 
             ex.context.drawImage(this.image, 0, 0);
+        }
+    }
+    toJson() {
+        return {
+            name: 'BackgroundImage',
+            src: this.src,
+            ...super.toJson(),
+        }
+    }
+    fromJson(json) {
+        if(json.name == 'BackgroundImage') {
+            this.src = json.src;
+            return super.fromJson(json);
         }
     }
 }
@@ -449,6 +431,25 @@ class StickBorder extends Border implements TouchHandler{
         this.stick.rotate.reset(this.w - this.stick.padding, - this.stick.padding, this.stick.padding*2,  this.stick.padding*2);
         this.stick.scale.reset(this.w - this.stick.padding, this.h - this.stick.padding, this.stick.padding*2, this.stick.padding*2);
     }
+    toJson() {
+        return {
+            name: 'StickBorder',
+            stick: {
+                padding: this.stick.padding,
+                activeColor: this.stick.activeColor,
+                inactiveColor: this.stick.inactiveColor
+            },
+            ...super.toJson(),
+        }
+    }
+    fromJson(json) {
+        if(json.name == 'BackgroundImage') {
+            this.stick.padding = json.stick.padding;
+            this.stick.activeColor = json.stick.activeColor;
+            this.stick.inactiveColor = json.stick.inactiveColor;
+            return super.fromJson(json);
+        }
+    }
 } 
 
 export class StickText extends StickBorder implements KeyHandler {
@@ -499,5 +500,127 @@ export class StickText extends StickBorder implements KeyHandler {
     key(data: { key: string; str: string; }) {
         if(this.isFocus) 
             this.str = data.str;
+    }
+    toJson() {
+        return {
+            name: 'StickText',
+            padding: this.padding,
+            font: this.font,
+            color: this.color,
+            str: this.str,
+            ...super.toJson(),
+        }
+    }
+    fromJson(json) {
+        if(json.name == 'StickText') {
+            this.padding = json.padding;
+            this.font = json.font;
+            this.color = json.color;
+            this.str = json.str;
+            return super.fromJson(json);
+        }
+    }
+}
+const classes = { Circle, Solid, Border, BackgroundImage, StickBorder, StickText };
+export class RenderManger extends Touch {
+    static selected: Renderable = null;
+    root = new Renderable();
+    constructor(private ex: ExCanvasRenderingContext2D){
+        super();
+    }
+    clear() {
+        this.ex.context.clearRect(0, 0, this.ex.canvas.width, this.ex.canvas.height);
+        this.root.initBoundingbox(null)
+        this.root.updateBoundingbox();
+    }
+    render() {
+        this.root.render(this.ex);
+    }
+    onDown(event) {
+        this.clear();
+        super.onDown(this.root, event);
+        this.render();
+    }
+    onMove(event) {
+        this.clear();
+        super.onMove(this.root, event);
+        this.render();
+    }
+    onUp() {
+        this.clear();
+        super.onUp(this.root);
+        this.render()
+    }
+    onKeyborad(event: KeyboardEvent, str) {
+        this.clear();
+        super.onKey(this.root, event, str);
+        this.render();
+    }
+    save() {
+        return this.root.toJson();
+    }
+    load(json) {
+        this.root.fromJson(json);
+    }
+    createText(){
+        this.clear();
+        let st = new StickText();
+        this.root.attach(st);
+        st.isFocus = true;
+        RenderManger.selected = st;
+        this.render();
+    }
+    removeText(){
+        this.clear();
+        if(RenderManger.selected) {
+            this.root.remove(RenderManger.selected);
+            RenderManger.selected = null;
+            this.render();
+        }
+    }
+    changeColor(color: string){
+        this.clear();
+        if(RenderManger.selected && RenderManger.selected.hasOwnProperty('color')) {
+            RenderManger.selected['color'] = color;
+            this.render();
+        }
+    }
+    changeFont(font: string){
+        this.clear();
+        if(RenderManger.selected && RenderManger.selected.hasOwnProperty('font')) {
+            RenderManger.selected['font'] = font;
+            // this.ex.context.font = font;
+            // this.ex.dummyfont = this.ex.measureText('|');
+            this.render();
+        }
+    }
+    changeStr(str: string){
+        this.clear();
+        if(RenderManger.selected && RenderManger.selected.hasOwnProperty('str')) {
+            RenderManger.selected['str'] = str;
+            this.render();
+        }
+    }
+    createBackgroundImage(src){
+        this.clear();
+        if(this.root.children[0] && this.root.children[0]['image']) {
+            let bg = this.root.children[0] as BackgroundImage;
+            bg.load(src, ()=>{
+                this.render();
+            });
+        }else {
+            let bg = new BackgroundImage();
+            this.root.attach(bg, 0);
+            bg.load(src, ()=>{
+                this.render();
+            });
+        }
+    }
+    removeBackgroundImage(){
+        this.clear();
+        if(this.root.children[0]['image']) {
+            this.root.remove(null, 0);
+            this.render();
+        }
     }
 }
