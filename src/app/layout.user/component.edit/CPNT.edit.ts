@@ -62,7 +62,7 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
     bgImages = [];
 
     @ViewChild(CCanvas) editor: CCanvas;
-    constructor(private location: Location, protected bus: BusService) {
+    constructor(private location: Location, protected bus: BusService, protected user: UserService) {
         super(bus);
         this.fonts = this.listFonts().map(font =>({family:font.family,style:font.style,weight:font.weight,variant:font.variant}))
         this.fonts = this.fonts.filter((font,i)=>this.fonts.findIndex(f=>f.family==font.family&&f.style==font.style&&f.weight==font.weight&&f.variant==font.variant)==i);
@@ -103,9 +103,10 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
         this.config = {};
     }
     save() {
-        let layout = this.editor.mgr.save();
         if(this.formConfig.valid){
-            this.formConfig.getRawValue();
+            let layout = this.editor.save();
+            let props = this.formConfig.getRawValue();
+            let base64 = this.editor.print();
         }
     }
     configBackgroundImage() {
@@ -120,6 +121,9 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
     configText() {
         this.text = {};
         this.editor.createText()
+    }
+    configTextChange(color){
+        this.text = {};
     }
     configTextColor(color){
         this.editor.changeColor(color)

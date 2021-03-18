@@ -119,6 +119,8 @@ export class ExCanvasRenderingContext2D {
 class Renderable extends Rect2d {
     children: Renderable[] = [];
     boundingbox = new Matrix();
+    printable: boolean = true;
+    visible: boolean = true;
     constructor(_x = 0, _y = 0, _w = 0, _h = 0, _angle = 0) {
         super(_w, _h);
         this.position.x = _x;
@@ -132,11 +134,15 @@ class Renderable extends Rect2d {
             ex.context.rotate(this.angle);
         }
     }
-    render(ex: ExCanvasRenderingContext2D) {
+    render(ex: ExCanvasRenderingContext2D, print: boolean = false) {
         this.before(ex);
-        this.draw(ex);
+        if(print) {
+            if(this.printable) this.draw(ex);
+        }else {
+            if(this.visible) this.draw(ex)
+        }
         this.children.forEach(child => {
-            child.render(ex);
+            child.render(ex, print);
         })
         this.after(ex);
     }
@@ -326,6 +332,42 @@ class Border extends Renderable {
         }
     }
 }
+class IconImage extends Renderable {
+    image = new Image();
+    color;
+    load(src, onload = null){
+        this.image.src = src;
+        this.src = src;
+        this.image.onload = () => {
+            if(onload){
+                onload();
+            }
+        };
+    }
+    constructor(public src){
+        super();
+        this.image.src = src;
+        this.src = src;
+    }
+    draw(ex: ExCanvasRenderingContext2D){
+        if(this.src) {
+            ex.context.drawImage(this.image, 0,0,this.image.width,this.image.height,0,0,this.w,this.h);
+        }
+    }
+    toJson() {
+        return {
+            name: 'IconImage',
+            src: this.src,
+            ...super.toJson(),
+        }
+    }
+    fromJson(json) {
+        if(json.name == 'IconImage') {
+            this.src = json.src;
+            return super.fromJson(json);
+        }
+    }
+}
 
 class BackgroundImage extends Renderable {
     image = new Image();
@@ -361,10 +403,10 @@ class BackgroundImage extends Renderable {
 }
 class StickBorder extends Border implements TouchHandler{
     stick = {
-        padding : 4,
-        config : new Solid(),
-        scale : new Solid(),
-        rotate : new Circle(),
+        padding : 6,
+        config : new IconImage('./assets/img/gear.svg'),
+        scale : new IconImage('./assets/img/resize.svg'),
+        rotate : new IconImage('./assets/img/rotate.svg'),
         activeColor: '#87ceeb',
         inactiveColor: '#cacaca'
     }
@@ -388,14 +430,14 @@ class StickBorder extends Border implements TouchHandler{
         if(this.isFocus || this.isScale || this.isRotate || this.isConfig){
             RenderManger.selected = this;
             this.borderColor = this.stick.activeColor;
-            this.stick.config.color = this.stick.activeColor;
-            this.stick.scale.color = this.stick.activeColor;
-            this.stick.rotate.color = this.stick.activeColor;
+            this.stick.config.visible = true;
+            this.stick.scale.visible = true;
+            this.stick.rotate.visible = true;
         }else {
             this.borderColor = this.stick.inactiveColor;
-            this.stick.config.color = this.stick.inactiveColor;
-            this.stick.scale.color = this.stick.inactiveColor;
-            this.stick.rotate.color = this.stick.inactiveColor;
+            this.stick.config.visible = false;
+            this.stick.scale.visible = false;
+            this.stick.rotate.visible = false;
         }
 
         if(this.isConfig && touch['onResult']) {
@@ -409,7 +451,7 @@ class StickBorder extends Border implements TouchHandler{
             this.scale(offset.x, offset.y)
         }else if(this.isRotate) {
             this.rotate(this.stick.rotate.position.radius2(offset));
-            console.log('rotate', offset, this.angle)
+            //console.log('rotate', offset, this.angle)
         }
         if(this.position.x > 10){
             let i = 1;
@@ -561,6 +603,10 @@ export class RenderManger extends Touch {
     }
     load(json) {
         this.root.fromJson(json);
+    }
+    print() {
+        this.root.render(this.ex, true);
+        return this.ex.canvas.toDataURL("image/jpeg");
     }
     createText(){
         this.clear();

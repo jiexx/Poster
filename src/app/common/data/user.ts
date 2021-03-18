@@ -166,7 +166,7 @@ export class UserService {
         }       
         return null;
     }
-    async post(name){
+    async post(obj){
         const my = this.myId();
         if(my && my.id) {
             
