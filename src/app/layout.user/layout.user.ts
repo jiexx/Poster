@@ -7,6 +7,7 @@ import { enterTransition } from './router.animation';
 import { UserService } from 'app/common/data/user';
 import { FormControl } from '@angular/forms';
 import { routeConfig } from './layout.user-routings.module';
+import { widthTransition } from 'app/common/animation/width';
 
 const kwValidator = (control: FormControl):{[key:string]: boolean | string} =>{
     if(!control.value) {
@@ -17,20 +18,7 @@ const kwValidator = (control: FormControl):{[key:string]: boolean | string} =>{
 @Component({
     templateUrl: './layout.user.html',
     styleUrls: ['./layout.user.css'],
-    animations: [
-        trigger(
-            'enterAnimation', [
-                transition(':enter', [
-                    style({transform: 'translateX(100%)',/*  opacity: 0 */ }),
-                    animate('200ms', style({ transform:'translateX(0)', /* opacity: 1  */}))
-                ]),
-                transition(':leave', [
-                    style({transform: 'translateX(0)', /* opacity: 1 */ }),
-                    animate('200ms', style({transform: 'translateX(100%)', /* opacity: 0  */}))
-                ])
-            ]
-        )
-    ],
+    animations: [widthTransition],
 })
 export class LayoutUser implements OnDestroy  {
     at = 0;

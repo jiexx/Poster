@@ -1,9 +1,10 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { nullValidator, UserService } from 'app/common/data/user';
 import { BusService, Bus } from 'app/common/bus/bus';
 import { Location } from '@angular/common';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CCanvas } from 'app/common/canvas/CPNT.canvas';
+import { Router } from '@angular/router';
 
 
 
@@ -19,13 +20,13 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
     title = new FormControl('xx', [
         nullValidator
     ]);
-    price = new FormControl('', [
+    price = new FormControl('1', [
         nullValidator
     ]);
-    amount = new FormControl('', [
+    amount = new FormControl('1', [
         nullValidator
     ]);
-    checkid = new FormControl('', [
+    checkid = new FormControl('1', [
         nullValidator
     ]);
     isModInc = new FormControl(true, [
@@ -62,7 +63,7 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
     bgImages = [];
 
     @ViewChild(CCanvas) editor: CCanvas;
-    constructor(private location: Location, protected bus: BusService, protected user: UserService) {
+    constructor(private location: Location, protected bus: BusService, protected user: UserService, public router : Router) {
         super(bus);
         this.fonts = this.listFonts().map(font =>({family:font.family,style:font.style,weight:font.weight,variant:font.variant}))
         this.fonts = this.fonts.filter((font,i)=>this.fonts.findIndex(f=>f.family==font.family&&f.style==font.style&&f.weight==font.weight&&f.variant==font.variant)==i);
@@ -104,9 +105,14 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
     }
     save() {
         if(this.formConfig.valid){
+            let base64 = this.editor.print();
             let layout = this.editor.save();
             let props = this.formConfig.getRawValue();
-            let base64 = this.editor.print();
+            this.user.post({props: props, layout: layout, base64: base64});
+            this.config = null;
+            /* this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+            this.router.onSameUrlNavigation = 'reload'; */
+            this.router.navigate(['/user/list'])
         }
     }
     configBackgroundImage() {

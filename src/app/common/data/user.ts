@@ -4,6 +4,7 @@ import { Injectable, NgModule } from '@angular/core';
 import { EDataPath, _url, _storageurl } from 'app/common/config';
 import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
+import { DataModule } from './data.module';
 
 export const nullValidator = (control: FormControl): { [key: string]: boolean | string } => {
     if (!control.value) {
@@ -102,7 +103,7 @@ export class Data {
 }
 
 
-@Injectable()
+@Injectable(/* {providedIn: 'root'} */)
 export class UserService {
 
     constructor(public router : Router, public http: HttpClient){
@@ -143,7 +144,7 @@ export class UserService {
     debugLogin(){
         localStorage.setItem('logined', JSON.stringify({id:1}));
     }
-    async login(username, password){
+    async login(username, password) {
         let result =  await this.data.remote.postSync(EDataPath.QUERY, [null,"staff","passwordLogin",[username,password,3600]]);
         if(result && result.result && result.result.length > 0){
             localStorage.setItem('logined',JSON.stringify(result.result[0]));
@@ -166,12 +167,14 @@ export class UserService {
         }       
         return null;
     }
-    async post(obj){
+    list = [];
+    post(obj = null){
         const my = this.myId();
-        if(my && my.id) {
-            
-        }       
-        return null;
+        if(my && obj) {
+            this.list.push(obj)
+        }
+        console.log('list',this.list, obj);       
+        return this.list;
     }
     async searchBy(keyword){
         const my = this.myId();
@@ -185,15 +188,3 @@ export class UserService {
     }
 }
 
-
-@NgModule({
-    imports: [
-        HttpClientModule
-    ],
-    providers: [
-        UserService
-    ],
-    
-    
-})
-export class UserModule { }
