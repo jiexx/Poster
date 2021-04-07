@@ -1,6 +1,7 @@
 import { Component, Input, ContentChild, OnChanges, Inject, Injector, ReflectiveInjector, Injectable, ElementRef, Renderer2, OnDestroy } from '@angular/core';
 import { DSheet } from './DIR.sheet';
 import { MatBottomSheet, MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
+import { Router } from '@angular/router';
 
 export class DData {
 }
@@ -25,8 +26,10 @@ class CContainer {
 export class CSheet implements OnChanges, OnDestroy {
     @Input() data: DData = null;
     @ContentChild(DSheet) item : DSheet;
-    constructor(private bottomsheet: MatBottomSheet) {
-        
+    constructor(private bottomsheet: MatBottomSheet, public router : Router) {
+        router.events.subscribe((val) => {
+            this.bottomsheet.dismiss();
+        });
     }
     ngOnDestroy(): void {
         this.bottomsheet.dismiss();
