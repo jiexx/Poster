@@ -163,6 +163,7 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
         return new Date().toLocaleDateString()
     }
     back() {
-        this.location.back();
+        //this.location.back();
+        this.router.navigate(['/user/list'])
     }
 }
