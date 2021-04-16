@@ -168,12 +168,14 @@ export class UserService {
         return null;
     }
     list = [];
-    post(obj = null){
+    post(obj = null, id = null){
         const my = this.myId();
         if(my && obj) {
-            this.list.push(obj)
+            this.list.push({...{id:this.list.length},...obj})
         }
-        console.log('list',this.list, obj);       
+        if(id) {
+            return this.list.find(i => i.id == id);
+        }
         return this.list;
     }
     async searchBy(keyword){

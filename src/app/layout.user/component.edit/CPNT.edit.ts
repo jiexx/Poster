@@ -1,10 +1,10 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentChecked, AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { nullValidator, UserService } from 'app/common/data/user';
 import { BusService, Bus } from 'app/common/bus/bus';
 import { Location } from '@angular/common';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CCanvas } from 'app/common/canvas/CPNT.canvas';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 
 
@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
     templateUrl: './CPNT.edit.html',
     styleUrls: ['./CPNT.edit.css'],
 })
-export class CEdit extends Bus implements OnInit, AfterViewInit {
+export class CEdit extends Bus implements OnInit, AfterContentChecked, AfterViewInit {
     name(): string {
         return 'CEdit';
     }
@@ -63,11 +63,15 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
     bgImages = [];
 
     @ViewChild(CCanvas) editor: CCanvas;
-    constructor(private location: Location, protected bus: BusService, protected user: UserService, public router : Router) {
+    constructor(private location: Location, protected bus: BusService, protected user: UserService, public router : Router, private route: ActivatedRoute) {
         super(bus);
         this.fonts = this.listFonts().map(font =>({family:font.family,style:font.style,weight:font.weight,variant:font.variant}))
         this.fonts = this.fonts.filter((font,i)=>this.fonts.findIndex(f=>f.family==font.family&&f.style==font.style&&f.weight==font.weight&&f.variant==font.variant)==i);
         this.font.setValue(this.fonts[0] || {family:'Arial',style:'normal',weight:'300',variant:'normal'});
+    }
+    ngAfterContentChecked(): void {
+        let id = this.route.snapshot.queryParamMap.get('id');
+        let d = this.user.post(null, id);
     }
     ngOnInit(): void {
         this.config = null;
@@ -76,7 +80,7 @@ export class CEdit extends Bus implements OnInit, AfterViewInit {
         this.formText.valueChanges.subscribe(()=>{
             this.editor.changeFont(`${this.font.value.style} ${this.font.value.variant} ${this.font.value.style} ${this.size.value}px arial`)
             this.editor.changeStr(this.str.value)
-        })
+        });
     }
     ngAfterViewInit(){
         this.editor.setEditMode('outside');

@@ -8,7 +8,7 @@
                 bred for hunting.</p>
         </mat-card-content>
         <mat-card-actions align="right">
-            <button mat-button>编辑</button>
+            <button mat-button >编辑</button>
             <button mat-button>预览</button>
         </mat-card-actions>
     </mat-card>
@@ -21,7 +21,7 @@
                 bred for hunting.</p>
         </mat-card-content>
         <mat-card-actions align="right">
-            <button mat-button>编辑</button>
+            <button mat-button [routerLink]="['/user/edit']" [queryParams]="{id: c.id}">编辑</button>
             <button mat-button>预览</button>
         </mat-card-actions>
     </mat-card>

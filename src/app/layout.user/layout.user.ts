@@ -8,7 +8,7 @@ import { UserService } from 'app/common/data/user';
 import { FormControl } from '@angular/forms';
 import { routeConfig } from './layout.user-routings.module';
 import { widthTransition } from 'app/common/animation/width';
-import { filter, startWith } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
 
 const kwValidator = (control: FormControl):{[key:string]: boolean | string} =>{
     if(!control.value) {
@@ -32,11 +32,13 @@ export class LayoutUser implements OnDestroy, OnInit  {
         
     }
     ngOnInit(): void {
+        
         this.router.events.pipe(filter((event) => event instanceof NavigationEnd), startWith(this.router)).subscribe((e) => {
             const path = this.route.snapshot['_urlSegment'].segments.reduce((p,e)=>p+'/'+e.path, '');
-            const cfg = routeConfig.find(rc => '/user/'+rc.path == path)
+            const cfg = routeConfig.find(rc => path.indexOf('/user/'+rc.path) == 0)
             this.mode = cfg.mode as any || 'seller';
         });
+
     }
     ngOnDestroy(): void {
     }
