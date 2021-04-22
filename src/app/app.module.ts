@@ -22,17 +22,23 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
         return true;
     }
     store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle): void {
-        this.handlers[route.routeConfig.path] = handle;
+        //console.log('store', this.getUrl(route), route.data.reuse, handle)
+        if(handle) this.handlers[this.getUrl(route)] = handle;
     }
     shouldAttach(route: ActivatedRouteSnapshot): boolean {
-        return !!route.routeConfig && !!this.handlers[route.routeConfig.path];
+        //console.log('shouldAttach', this.getUrl(route), route.data.reuse)
+        return !!this.handlers[this.getUrl(route)] && route.data.reuse == true;
     }
     retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle {
         if (!route.routeConfig) return null;
-        return this.handlers[route.routeConfig.path];
+        return this.handlers[this.getUrl(route)];
     }
     shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
-        return future.routeConfig === curr.routeConfig;
+        return  (future.routeConfig === curr.routeConfig);
+    }
+
+    private getUrl(route: ActivatedRouteSnapshot) {
+        return route['_routerState'].url.replace(/\//g, '_')
     }
 }
 

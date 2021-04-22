@@ -192,12 +192,14 @@ class Renderable extends Rect2d {
         };
     }
     fromJson(json){
-        if(json.name == 'Renderable') {
+        if(json && json.name == 'Renderable') {
             this.position.copy(json.position);
             this.w = json.w;
             this.h = json.h;
             this.angle = json.angle;
-            this.children = json.children.map(e=>new classes[e.name](e.position.x, e.position.y, e.w, e.h, e.angle).fromJson(e));
+            this.children = json.children.map(e=>
+                (new classes[e.name](e.position.x, e.position.y, e.w, e.h, e.angle)).fromJson(e)
+            );
         }
         return this;
     }
@@ -274,15 +276,16 @@ class Circle extends Renderable {
     }
     toJson() {
         return {
+            ...super.toJson(),
             name: 'Circle',
             color: this.color,
-            ...super.toJson(),
         }
     }
     fromJson(json) {
         if(json.name == 'Circle') {
+            super.fromJson(json);
             this.color = json.color;
-            return super.fromJson(json);
+            return this;
         }
     }
 }
@@ -294,15 +297,16 @@ class Solid extends Renderable {
     }
     toJson() {
         return {
+            ...super.toJson(),
             name: 'Solid',
             color: this.color,
-            ...super.toJson(),
         }
     }
     fromJson(json) {
         if(json.name == 'Solid') {
+            super.fromJson(json);
             this.color = json.color;
-            return super.fromJson(json);
+            return this;
         }
     }
 }
@@ -318,17 +322,18 @@ class Border extends Renderable {
     }
     toJson() {
         return {
+            ...super.toJson(),
             name: 'Border',
             width: this.width,
             borderColor: this.borderColor,
-            ...super.toJson(),
         }
     }
     fromJson(json) {
         if(json.name == 'Border') {
+            super.fromJson(json)
             this.width = json.width;
             this.borderColor = json.borderColor;
-            return super.fromJson(json);
+            return this;
         }
     }
 }
@@ -356,15 +361,16 @@ class IconImage extends Renderable {
     }
     toJson() {
         return {
+            ...super.toJson(),
             name: 'IconImage',
             src: this.src,
-            ...super.toJson(),
         }
     }
     fromJson(json) {
         if(json.name == 'IconImage') {
+            super.fromJson(json);
             this.src = json.src;
-            return super.fromJson(json);
+            return this;
         }
     }
 }
@@ -389,15 +395,16 @@ class BackgroundImage extends Renderable {
     }
     toJson() {
         return {
+            ...super.toJson(),
             name: 'BackgroundImage',
             src: this.src,
-            ...super.toJson(),
         }
     }
     fromJson(json) {
         if(json.name == 'BackgroundImage') {
+            super.fromJson(json);
             this.src = json.src;
-            return super.fromJson(json);
+            return this;
         }
     }
 }
@@ -475,21 +482,22 @@ class StickBorder extends Border implements TouchHandler{
     }
     toJson() {
         return {
+            ...super.toJson(),
             name: 'StickBorder',
             stick: {
                 padding: this.stick.padding,
                 activeColor: this.stick.activeColor,
                 inactiveColor: this.stick.inactiveColor
             },
-            ...super.toJson(),
         }
     }
     fromJson(json) {
         if(json.name == 'BackgroundImage') {
+            super.fromJson(json);
             this.stick.padding = json.stick.padding;
             this.stick.activeColor = json.stick.activeColor;
             this.stick.inactiveColor = json.stick.inactiveColor;
-            return super.fromJson(json);
+            return this;
         }
     }
 } 
@@ -545,21 +553,22 @@ export class StickText extends StickBorder implements KeyHandler {
     }
     toJson() {
         return {
+            ...super.toJson(),
             name: 'StickText',
             padding: this.padding,
             font: this.font,
             color: this.color,
-            str: this.str,
-            ...super.toJson(),
+            str: this.str
         }
     }
     fromJson(json) {
         if(json.name == 'StickText') {
+            super.fromJson(json);
             this.padding = json.padding;
             this.font = json.font;
             this.color = json.color;
             this.str = json.str;
-            return super.fromJson(json);
+            return this;
         }
     }
 }
@@ -602,7 +611,9 @@ export class RenderManger extends Touch {
         return this.root.toJson();
     }
     load(json) {
+        this.root = new Renderable();
         this.root.fromJson(json);
+        this.render();
     }
     print() {
         this.root.render(this.ex, true);

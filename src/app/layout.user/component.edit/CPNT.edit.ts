@@ -1,10 +1,11 @@
-import { AfterContentChecked, AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentChecked, AfterViewChecked, AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { nullValidator, UserService } from 'app/common/data/user';
 import { BusService, Bus } from 'app/common/bus/bus';
 import { Location } from '@angular/common';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CCanvas } from 'app/common/canvas/CPNT.canvas';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { filter, startWith } from 'rxjs/operators';
 
 
 
@@ -12,7 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     templateUrl: './CPNT.edit.html',
     styleUrls: ['./CPNT.edit.css'],
 })
-export class CEdit extends Bus implements OnInit, AfterContentChecked, AfterViewInit {
+export class CEdit extends Bus implements OnInit, AfterViewInit {
     name(): string {
         return 'CEdit';
     }
@@ -69,10 +70,6 @@ export class CEdit extends Bus implements OnInit, AfterContentChecked, AfterView
         this.fonts = this.fonts.filter((font,i)=>this.fonts.findIndex(f=>f.family==font.family&&f.style==font.style&&f.weight==font.weight&&f.variant==font.variant)==i);
         this.font.setValue(this.fonts[0] || {family:'Arial',style:'normal',weight:'300',variant:'normal'});
     }
-    ngAfterContentChecked(): void {
-        let id = this.route.snapshot.queryParamMap.get('id');
-        let d = this.user.post(null, id);
-    }
     ngOnInit(): void {
         this.config = null;
         this.inspect = null;
@@ -83,6 +80,13 @@ export class CEdit extends Bus implements OnInit, AfterContentChecked, AfterView
         });
     }
     ngAfterViewInit(){
+        if(this.route.snapshot.queryParamMap.has('id')){
+            let id = this.route.snapshot.queryParamMap.get('id');
+            let d = this.user.post(null, id);
+            if(d && d.length == 1) {
+                this.editor.load(d[0].layout);
+            }
+        }
         this.editor.setEditMode('outside');
     }
     fonts = null;

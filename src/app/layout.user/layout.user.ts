@@ -29,6 +29,7 @@ export class LayoutUser implements OnDestroy, OnInit  {
             this.mode = params['mode'];
             
         }); */
+        console.log('LayoutUser')
         
     }
     ngOnInit(): void {

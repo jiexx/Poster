@@ -25,7 +25,7 @@ export class CList implements OnInit {
         
     }
     constructor(private user : UserService, private router: Router, private route: ActivatedRoute){
-        
+        console.log('clist')
     }
     keyword = new FormControl('', [
         mobileValidator

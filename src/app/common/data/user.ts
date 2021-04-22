@@ -174,7 +174,7 @@ export class UserService {
             this.list.push({...{id:this.list.length},...obj})
         }
         if(id) {
-            return this.list.find(i => i.id == id);
+            return [this.list.find(i => i.id == id)];
         }
         return this.list;
     }
