@@ -36,6 +36,9 @@ export class CList implements OnInit {
     getList(){
         return this.user.post();
     }
+
+
+    
     search(){
     }
     detail(item){

@@ -185,8 +185,10 @@ class Renderable extends Rect2d {
         }
     }
     toJson(){
+        let caption = this.children.find(e=>e['str'] && e['str'].length > 0);
         return {
             name: 'Renderable', 
+            caption: caption ? caption['str'] : null,
             position: this.position, w: this.w, h: this.h, angle: this.angle, 
             children: this.children.map(e=>e.toJson())
         };
@@ -492,7 +494,7 @@ class StickBorder extends Border implements TouchHandler{
         }
     }
     fromJson(json) {
-        if(json.name == 'BackgroundImage') {
+        if(json.name == 'StickBorder') {
             super.fromJson(json);
             this.stick.padding = json.stick.padding;
             this.stick.activeColor = json.stick.activeColor;
