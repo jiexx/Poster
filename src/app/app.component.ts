@@ -25,7 +25,6 @@ export class AppComponent extends Bus implements AfterContentChecked {
     deferredPrompt: any;
     @HostListener('window:beforeinstallprompt', ['$event'])
     onbeforeinstallprompt(e) {
-        console.log(e);
         // Prevent Chrome 67 and earlier from automatically showing the prompt
         e.preventDefault();
         // Stash the event so it can be triggered later.
@@ -37,7 +36,9 @@ export class AppComponent extends Bus implements AfterContentChecked {
     onDlgClose() {
         // hide our user interface that shows our A2HS button
         // Show the prompt
+        console.log('onbeforeinstallprompt',this);
         this.deferredPrompt.prompt();
+        
         // Wait for the user to respond to the prompt
         this.deferredPrompt.userChoice.then((choiceResult) => {
             if (choiceResult.outcome === 'accepted') {

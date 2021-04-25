@@ -132,7 +132,8 @@ export class UserService {
     }
     hasA2h(){
         try{
-            return JSON.parse(localStorage.getItem('logined')).screen;
+            let logined = JSON.parse(localStorage.getItem('logined'));
+            return logined ? logined.screen : null;
         }catch(err){
             return false;
         }

@@ -4,8 +4,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
+    "ssl":"ng s -o ---ssl true --ssl-key <path to key file>  --ssl-cert <path to crt file>",
+    "build": "ng build --aot --prod --base-href '</web/path>' --deploy-url '<./libjs/path>'",
+    "test": "ng test ",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "postinstall": "ngcc"

@@ -18,7 +18,7 @@ export class UpdateService {
             alert(
                 `An error occurred that we cannot recover from:\n${event.reason}\n\n` +
                 'Please reload the page.');
-            });
+        });
     }
 
     private promptUser(): void {

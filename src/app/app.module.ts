@@ -62,7 +62,7 @@ export class HammerConfig extends HammerGestureConfig {
         BusModule,
         MatMenuModule,
         HammerModule,
-        ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production, registrationStrategy: 'registerImmediately' }),
+        ServiceWorkerModule.register('./assets/js/ngsw-worker.js', { enabled: true/* environment.production */, registrationStrategy: 'registerImmediately' }),
         // LayoutMainModule
         DialogModule
     ],
