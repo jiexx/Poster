@@ -30,7 +30,8 @@ export const routeConfig = [
     },
     {
         path: 'detail',
-        component: CDetail
+        component: CDetail,
+        mode: 'editor'
     },
     {
         path: 'edit',
