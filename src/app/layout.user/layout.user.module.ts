@@ -25,6 +25,7 @@ import { CEdit } from './component.edit/CPNT.edit';
 import { CanvasModule } from 'app/common/canvas/canvas.module';
 import { CarouselModule } from 'app/common/carousel/carousel.module';
 import { ColorPickerModule } from 'app/common/picker/picker.module';
+import { AutofocusModule } from 'app/common/autofocus/autofocus.module';
 
 @NgModule({
     imports: [
@@ -49,7 +50,8 @@ import { ColorPickerModule } from 'app/common/picker/picker.module';
         ColorPickerModule,
         DialogModule,
         SheetModule,
-        CanvasModule
+        CanvasModule,
+        AutofocusModule,
     ],
     declarations: [
         LayoutUser,

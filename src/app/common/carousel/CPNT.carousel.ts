@@ -2,12 +2,13 @@ import { Component, ContentChildren, Input, QueryList, ViewChild, ElementRef, Re
 import { AnimationBuilder, style, animate, AnimationMetadata, AnimationFactory, group } from '@angular/animations';
 import { DCarousel } from './DIR.carousel';
 import { merge, combineLatest } from 'rxjs';
+import { timestamp } from 'rxjs/operators';
 
 
 @Component({
     selector: 'carousel',
     template:
-        `<div #container (swipeleft)="swiperight()" (swiperight)="swipeleft()">
+        `<div #container (swipeleft)="swiperight()" (swiperight)="swipeleft()" (load)="onLoad()">
             <ng-content select="[carousel-item]" ></ng-content>   
         </div>`,
     styles: [
@@ -25,15 +26,17 @@ export class CCarousel implements AfterViewInit {
     @ViewChild('container') slidesContainer: ElementRef<HTMLDivElement>;
     @ContentChildren(DCarousel) items : QueryList<DCarousel>;
     
-    constructor(private renderer:Renderer2, private builder: AnimationBuilder ) {
+    constructor(private builder: AnimationBuilder ) {
         
     }
-    ngAfterViewInit(){
+    onLoad(){
         this.align();
+    }
+    ngAfterViewInit(){
         //this.slidesIndex = this.slidesContainer.nativeElement.childElementCount-1;
-        this.items.changes.subscribe(e=>{
-            this.align();
-        })
+        // this.items.changes.subscribe(e=>{
+        //     this.align();
+        // })
     }
     align(){
         if(this.height != '0'){

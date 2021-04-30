@@ -25,10 +25,8 @@ export class CList implements OnInit {
         
     }
     constructor(private user : UserService, private router: Router, private route: ActivatedRoute){
-        
+        console.log('clist')
     }
-    list = [
-    ];
     keyword = new FormControl('', [
         mobileValidator
     ]);
@@ -36,41 +34,13 @@ export class CList implements OnInit {
         
     }
     getList(){
+        return this.user.post();
     }
+
+
+    
     search(){
-        // this.router.navigate(['/main/search'], {queryParams: {kw: $src.value}});
-        if(this.keyword.valid) {
-            this.user.searchBy(this.keyword.value).then(result =>{
-                this.list = result.map(rec=>({
-                    name: rec.userName, 
-                    tel:rec.userMobile, 
-                    id:rec.userIdnum, 
-                    address: rec.userAddress, 
-                    source: rec.source, 
-                    datatime: rec.clinicDT + ' '+ rec.amOrPm,
-                    uid: rec.userId,
-                    resId: rec.id,
-                    payment: rec.NATPayType}))
-            });
-        }else {
-            this.keyword.markAllAsTouched();
-        }
     }
     detail(item){
-        const mode = this.route.snapshot.queryParamMap.get('mode');
-        if(mode == 'editable'){
-            this.router.navigate(['/user/edit'], {queryParams: {userid: item.id, mode: 'input'}})
-        }else if(mode == 'readonly'){
-            this.router.navigate(['/user/detail'], {queryParams: {
-                userid: item.id, mode: 'confirm', 
-                name: item.name, 
-                tel: item.tel, 
-                address: item.address, 
-                resId: item.resId,
-                datatime: item.datatime, 
-                source: item.source,
-                uid: item.uid,
-                payment: item.payment }})
-        }
     }
 }

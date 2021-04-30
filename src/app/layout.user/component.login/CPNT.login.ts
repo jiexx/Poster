@@ -2,10 +2,7 @@ import { Component, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { UserService } from 'app/common/data/user';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { IResult } from 'app/common/config';
 import { Router, ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
-import { enterTransition } from '../router.animation';
-
 
 const mobileValidator = (control: FormControl):{[key:string]: boolean | string} =>{
     if(!control.value) {

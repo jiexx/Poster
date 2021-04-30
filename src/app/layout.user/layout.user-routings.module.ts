@@ -25,11 +25,13 @@ export const routeConfig = [
     {
         path: 'list',
         component: CList,
-        mode: 'seller'
+        mode: 'seller',
+        data: { reuse: true },
     },
     {
         path: 'detail',
-        component: CDetail
+        component: CDetail,
+        mode: 'editor'
     },
     {
         path: 'edit',
@@ -47,7 +49,7 @@ export const routeConfig = [
         pathMatch: 'full',
     }
 ];
-const routes: Routes = routeConfig.map(rc => rc.mode ? {path:rc.path, component: rc.component, canActivate: rc.canActivate} : rc);
+const routes: Routes = routeConfig.map(rc => rc.mode ? {path:rc.path, component: rc.component, canActivate: rc.canActivate, data: rc.data} : rc);
 
 @NgModule({
     imports: [

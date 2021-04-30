@@ -188,6 +188,15 @@ export class CCanvas extends Bus implements OnChanges, AfterViewInit  {
     constructor(protected bus: BusService) {
         super(bus);
     }
+    save() {
+        return this.mgr.save();
+    }
+    load(json) {
+        this.mgr.load(json);
+    }
+    print() {
+        return this.mgr.print();
+    }
     createText(){
         this.mgr.createText();
     }
@@ -202,6 +211,9 @@ export class CCanvas extends Bus implements OnChanges, AfterViewInit  {
     }
     changeFont(font: string){
         this.mgr.changeFont(font);
+    }
+    changeColor(color: string){
+        this.mgr.changeColor(color);
     }
     changeStr(str: string){
         this.mgr.changeStr(str);

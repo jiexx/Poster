@@ -1,5 +1,6 @@
 import { Injectable, OnDestroy, Component } from '@angular/core';
 import { Subject } from 'rxjs';
+import { BusModule } from './bus.module';
 
 
 export interface IMessageData {
@@ -34,11 +35,11 @@ interface SubjectList {
     [key: string]: Subject<IBusMessage>;
 }
 
-@Injectable()
+@Injectable(/* {providedIn: 'root'} */)
 export class BusService {
     private subjects : SubjectList = {}; 
     constructor(){
-        // console.log(this.constructor.name)
+         console.log(this.constructor.name)
     }
 
     send(to: string, msg: IBusMessage) {

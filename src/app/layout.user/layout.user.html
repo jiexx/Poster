@@ -1,47 +1,42 @@
 <div fxLayout="column" fxLayoutAlign="center stretch" fxFill>
-    <mat-toolbar fxFlex="none" color="primary" *ngIf="mode=='seller'">
-        <mat-toolbar-row class="title">
-            <mat-form-field appearance="outline" color="white">
+    <div *ngIf="mode=='seller'" class="mat-elevation-z6 app-navbar" #search>
+        <nav mat-tab-nav-bar backgroundColor="primary" *ngIf="!search.visible">
+            <a mat-tab-link [active]="at==0" (click)="at=0"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
+                <div>推荐</div>
+            </a>
+            <a mat-tab-link [active]="at==1" (click)="at=1">
+                <div>客户</div>
+            </a>
+            <a mat-tab-link [active]="at==2" (click)="at=2">
+                <div>我</div>
+            </a>
+            <a mat-tab-link [active]="at==3" (click)="at=3" [routerLink]="['/user/edit']"><mat-icon>add</mat-icon></a>
+            <a mat-tab-link [active]="at==4" (click)="at=4;search.visible=true"><mat-icon>search</mat-icon></a>
+        </nav>
+        <nav mat-tab-nav-bar backgroundColor="primary" *ngIf="search.visible" >
+            <mat-form-field appearance="outline" [@widthTransition]>
+                <input type="text" matInput [formControl]="keyword"  (blur)="search.visible=false" [autofocus]="true" />
+                <button mat-icon-button matSuffix (click)="search()"><mat-icon>search</mat-icon></button>
+            </mat-form-field>
+        </nav>
+    </div>
+    <div *ngIf="mode=='customer'" class="mat-elevation-z6 app-navbar">
+        <div mat-tab-nav-bar backgroundColor="primary">
+            <mat-form-field appearance="outline" color="white" class="w100 p10">
                 <input type="search" matInput [formControl]="keyword"/>
                 <button mat-icon-button matSuffix (click)="search()"><mat-icon>search</mat-icon></button>
             </mat-form-field>
-            <div class="title-button-wrapper">
-                <button mat-icon-button class="title-button-suffix" [routerLink]="['/user/edit']"><mat-icon class="title-icon-suffix">add</mat-icon></button>
-            </div>
-        </mat-toolbar-row>
-        <mat-toolbar-row>
-            <nav mat-tab-nav-bar backgroundColor="primary">
-                <a mat-tab-link [active]="at==0" (click)="at=0"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
-                    <div>推荐</div>
-                </a>
-                <a mat-tab-link [active]="at==1" (click)="at=1">
-                    <div>客户</div>
-                </a>
-                <a mat-tab-link [active]="at==2" (click)="at=2">
-                    <div>我</div>
-                </a>
-            </nav>
-        </mat-toolbar-row>
-    </mat-toolbar>
-    <mat-toolbar fxFlex="none" color="primary" *ngIf="mode=='customer'">
-        <mat-toolbar-row class="title">
-            <mat-form-field appearance="outline" color="white">
-                <input type="search" matInput [formControl]="keyword"/>
-                <button mat-icon-button matSuffix (click)="search()"><mat-icon>search</mat-icon></button>
-            </mat-form-field>
-        </mat-toolbar-row>
-        <mat-toolbar-row>
-            <nav mat-tab-nav-bar backgroundColor="primary">
-                <a mat-tab-link [active]="at==0" (click)="at=0"> 
-                    <div>推荐</div>
-                </a>
-                <a mat-tab-link [active]="at==2" (click)="at=2">
-                    <div>我</div>
-                </a>
-            </nav>
-        </mat-toolbar-row>
-    </mat-toolbar>
-    <div fxFlex="grow">
-        <router-outlet #o="outlet" ></router-outlet>  
+        </div>
+        <nav mat-tab-nav-bar backgroundColor="primary">
+            <a mat-tab-link [active]="at==0" (click)="at=0"><!-- [routerLinkActiveOptions]="{exact:true}"  > -->
+                <div>推荐</div>
+            </a>
+            <a mat-tab-link [active]="at==2" (click)="at=2">
+                <div>我</div>
+            </a>
+        </nav>
+    </div>
+    <div fxFlex="grow" [ngClass]="mode=='customer'||mode=='seller'?'pt60':''">
+        <router-outlet #o="outlet"></router-outlet>  
     </div>
 </div>

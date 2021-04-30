@@ -87,6 +87,11 @@ export class Vector2d implements IVector2d{
     dot(v: Vector2d){
         return this.x * v.x + this.y * v.y;
     }
+    copy(v: IVector2d) {
+        this.x = v.x;
+        this.y = v.y;
+        return this;
+    }
     add(v: IVector2d) {
         this.x += v.x;
         this.y += v.y;
